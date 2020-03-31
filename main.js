@@ -7,7 +7,7 @@ async function main() {
   const join = await spawn(new Worker("./proc.js"));
   join();
 
-  sleep(10);
+  sleep(20);
 
   await Thread.terminate(join);
 
