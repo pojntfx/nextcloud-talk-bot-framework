@@ -17,11 +17,10 @@ First, create an account for the bot in Nextcloud.
 Configure the bot with the following env variables:
 
 ```bash
-NCTB_SERVER="https://nx6978.your-storageshare.
-de"
-NCTB_USER="jitsi--bot"
-NCTB_PASS="secretpassword"
-NCTB_JITSI_URL="https://meet.jit.si"
+export NCTB_SERVER="https://nx6978.your-storageshare.de"
+export NCTB_USER="jitsi--bot"
+export NCTB_PASS="secretpassword"
+export NCTB_JITSI_URL="https://meet.jit.si"
 ```
 
 And run it:

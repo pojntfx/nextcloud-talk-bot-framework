@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/pojntfx/nextcloud-talk-jitsi-bot#readme",
   "dependencies": {
-    "nextcloud-talk-bot": "^0.1.5"
+    "nextcloud-talk-bot": "^0.1.5",
+    "sleep": "^6.1.0",
+    "threads": "^1.3.1"
   }
 }

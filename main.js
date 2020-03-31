@@ -1,14 +1,17 @@
-const Nextcloudbot = require("nextcloud-talk-bot");
+const { spawn, Thread, Worker } = require("threads");
+const { sleep } = require("sleep");
 
-const bot = new Nextcloudbot({
-  autoJoin: true
-});
+async function main() {
+  console.log("subscribing ...");
 
-bot.onText(/^\#(v|V)ideo(call|chat)$/, msg =>
-  msg.reply(
-    `@${msg.actorId} started a video call. Tap on ${process.env.NCTB_JITSI_URL}/${msg.token} to join!`,
-    false
-  )
-);
+  const join = await spawn(new Worker("./proc.js"));
+  join();
 
-bot.startPolling();
+  sleep(10);
+
+  await Thread.terminate(join);
+
+  main();
+}
+
+main().catch(console.error);
