@@ -6,6 +6,6 @@ COPY package-lock.json package.json ./
 
 RUN npm install
 
-COPY main.js ./
+COPY main.js proc.js ./
 
 CMD node main.js
