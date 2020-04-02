@@ -6,8 +6,8 @@ type OCSRoom struct {
 	} `json:"ocs"`
 }
 
-type OCSChat struct {
+type OCSMessage struct {
 	OCS struct {
-		Data []Chat `json:"chat"`
+		Data []Message `json:"data"`
 	} `json:"ocs"`
 }
