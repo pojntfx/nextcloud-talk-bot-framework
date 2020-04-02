@@ -3,17 +3,19 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 	"time"
 
-	cmap "github.com/orcaman/concurrent-map"
+	"github.com/akrylysov/pogreb"
 	"github.com/pojntfx/nextcloud-talk-jitsi-bot/pkg/v2/pkg/client"
 )
 
 func main() {
 	var (
-		url      = os.Getenv("NEXTCLOUD_URL")
-		username = os.Getenv("NEXTCLOUD_USERNAME")
-		password = os.Getenv("NEXTCLOUD_PASSWORD")
+		url        = os.Getenv("NEXTCLOUD_URL")
+		username   = os.Getenv("NEXTCLOUD_USERNAME")
+		password   = os.Getenv("NEXTCLOUD_PASSWORD")
+		dbLocation = os.Getenv("DB_LOCATION")
 	)
 
 	roomChan := make(chan client.Room)
@@ -48,35 +50,59 @@ func main() {
 		}
 	}()
 
-	knownIDs := cmap.New()
+	knownIDs, err := pogreb.Open(dbLocation, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer knownIDs.Close()
+
 	chatChan := make(chan client.Chat)
 	go func() {
 		for room := range roomChan {
-			go func(token string) {
-				for {
-					lastID, _ := knownIDs.Get(token)
+			log.Printf(`Joined room "%v" ("%v") with ID "%v" and token "%v"`, room.DisplayName, room.Name, room.ID, room.Token)
 
-					chats, err := client.GetChats(url, username, password, token)
+			go func(currentRoom client.Room) {
+				for {
+					lastID := []byte{}
+					has, err := knownIDs.Has([]byte(currentRoom.Token))
 					if err != nil {
 						log.Fatal(err)
 					}
 
+					if has {
+						lastID, err = knownIDs.Get([]byte(currentRoom.Token))
+						if err != nil {
+							log.Fatal(err)
+						}
+					}
+
+					chats, err := client.GetChats(url, username, password, currentRoom.Token)
+					if err != nil {
+						if err.Error() == "invalid character '<' looking for beginning of value" {
+							log.Printf(`Left room "%v" ("%v") with ID "%v" and token "%v"`, currentRoom.DisplayName, currentRoom.Name, currentRoom.ID, currentRoom.Token)
+
+							return
+						}
+
+						log.Fatal(err)
+					}
+
 					chat := chats[0]
-					if chat.ID != lastID {
+					if strconv.Itoa(chat.ID) != string(lastID) {
 						chatChan <- chats[0]
 
-						log.Println(token, lastID, chat.ID)
-
-						knownIDs.Set(token, chat.ID)
+						if err := knownIDs.Put([]byte(currentRoom.Token), []byte(strconv.Itoa(chat.ID))); err != nil {
+							log.Fatal(err)
+						}
 					}
 
 					time.Sleep(time.Second * 5)
 				}
-			}(room.Token)
+			}(room)
 		}
 	}()
 
 	for chat := range chatChan {
-		log.Println(chat)
+		log.Printf(`Received message from "%v" ("%v") in room "%v" with ID "%v": "%v"`, chat.ActorDisplayName, chat.ActorID, chat.Token, chat.ID, chat.Message)
 	}
 }
