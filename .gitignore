@@ -1,2 +1,1 @@
-node_modules
-lastIds.json
+*.db

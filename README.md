@@ -1,6 +1,6 @@
-# nextcloud-talk-jitsi-bot
+# Nextcloud Talk Jitsi Bot
 
-A chat bot for Nextcloud Talk that creates [Jitsi](https://jitsi.org) video chat meetings.
+A chat bot for Nextcloud Talk that creates [Jitsi](https://jitsi.org) video chat meetings. It also includes a framework for building Nextcloud Talk chatbots.
 
 ## Overview
 
@@ -8,29 +8,35 @@ Nextcloud Talk Jitsi Bot creates ad-hoc Jitsi meetings from Nextcloud Talk. Just
 
 ## Installation
 
+### Go Package
+
+A Go package [is available](https://pkg.go.dev/github.com/pojntfx/nextcloud-talk-jitsi-bot).
+
+### Docker Image
+
 A Docker image is available on [Docker Hub](https://hub.docker.com/r/pojntfx/nextcloud-talk-jitsi-bot).
 
 ## Usage
 
 First, create an account for the bot in Nextcloud.
 
-Configure the bot with the following env variables:
+Then, run it:
 
 ```bash
-export NCTB_SERVER="https://nx6978.your-storageshare.de"
-export NCTB_USER="jitsi--bot"
-export NCTB_PASS="secretpassword"
-export NCTB_JITSI_URL="https://meet.jit.si"
-```
-
-And run it:
-
-```bash
-docker run -e NCTB_SERVER=$NCTB_SERVER -e NCTB_USER=$NCTB_USER -e NCTB_PASS=$NCTB_PASS -e NCTB_JITSI_URL=$NCTB_JITSI_URL pojntfx/nextcloud-talk-jitsi-bot
+% docker volume create nextcloud-talk-jitsi-bot # This is required so that messages don't get send twice
+% docker run \
+    -e BOT_NEXTCLOUD_URL="https://nx6978.your-storageshare.de" \
+    -e BOT_NEXTCLOUD_USERNAME="botusername" \
+    -e BOT_NEXTCLOUD_PASSWORD="botpassword" \
+    -e BOT_DB_LOCATION="/var/lib/nextcloud-jitsi-bot" \
+    -e BOT_JITSI_URL="https://meet.jit.si" \
+    -v nextcloud-talk-jitsi-bot:/var/lib/nextcloud-jitsi-bot \
+    -d \
+    pojntfx/nextcloud-talk-jitsi-bot
 ```
 
 ## License
 
-nextcloud-talk-jitsi-bot (c) 2020 Felix Pojtinger
+Nextcloud Talk Jitsi Bot (c) 2020 Felix Pojtinger
 
 SPDX-License-Identifier: AGPL-3.0
