@@ -23,13 +23,20 @@ func main() {
 	chatChan := make(chan client.Chat)
 	for i := range rooms {
 		go func(token string) {
+			lastID := 0
+
 			for {
 				chats, err := client.GetChats(url, username, password, token)
 				if err != nil {
 					log.Fatal(err)
 				}
 
-				chatChan <- chats[0]
+				chat := chats[0]
+				if chat.ID != lastID {
+					chatChan <- chats[0]
+
+					lastID = chat.ID
+				}
 
 				time.Sleep(time.Second * 5)
 			}
