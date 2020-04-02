@@ -16,14 +16,14 @@ type Chat struct {
 	Message          string `json:"message"`
 }
 
-// ChatResponse is the API response
+// ChatResponse is the API response for chats
 type ChatResponse struct {
 	OCS struct {
 		Data []Chat `json:"data"`
 	} `json:"ocs"`
 }
 
-// GetChats gets the chat messages
+// GetChats gets the chat messages for a room
 func GetChats(url, username, password, room string) ([]Chat, error) {
 	client := resty.New()
 

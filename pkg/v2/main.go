@@ -12,13 +12,19 @@ func main() {
 		url      = os.Getenv("NEXTCLOUD_URL")
 		username = os.Getenv("NEXTCLOUD_USERNAME")
 		password = os.Getenv("NEXTCLOUD_PASSWORD")
-		room     = os.Getenv("NEXTCLOUD_ROOM")
 	)
 
-	chats, err := client.GetChats(url, username, password, room)
+	rooms, err := client.GetRooms(url, username, password)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println(chats[0])
+	for _, room := range rooms {
+		chats, err := client.GetChats(url, username, password, room.Token)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println(chats[0])
+	}
 }
