@@ -11,11 +11,11 @@ import (
 
 func main() {
 	var (
-		url        = os.Getenv("NEXTCLOUD_URL")
-		username   = os.Getenv("NEXTCLOUD_USERNAME")
-		password   = os.Getenv("NEXTCLOUD_PASSWORD")
-		dbLocation = os.Getenv("DB_LOCATION")
-		jitsiURL   = os.Getenv("JITSI_URL")
+		url        = os.Getenv("BOT_NEXTCLOUD_URL")
+		username   = os.Getenv("BOT_NEXTCLOUD_USERNAME")
+		password   = os.Getenv("BOT_NEXTCLOUD_PASSWORD")
+		dbLocation = os.Getenv("BOT_DB_LOCATION")
+		jitsiURL   = os.Getenv("BOT_JITSI_URL")
 	)
 
 	chatChan, statusChan := make(chan client.Chat), make(chan string)
