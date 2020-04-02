@@ -10,7 +10,7 @@ Nextcloud Talk Jitsi Bot creates ad-hoc Jitsi meetings from Nextcloud Talk. Just
 
 ### Go Package
 
-A Go package [is available](https://pkg.go.dev/github.com/pojntfx/nextcloud-talk-jitsi-bot).
+A Go package [is available](https://pkg.go.dev/mod/github.com/pojntfx/nextcloud-talk-jitsi-bot).
 
 ### Docker Image
 
