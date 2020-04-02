@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	cmap "github.com/orcaman/concurrent-map"
 	"github.com/pojntfx/nextcloud-talk-jitsi-bot/pkg/v2/pkg/client"
 )
 
@@ -47,13 +48,14 @@ func main() {
 		}
 	}()
 
+	knownIDs := cmap.New()
 	chatChan := make(chan client.Chat)
 	go func() {
 		for room := range roomChan {
 			go func(token string) {
-				lastID := 0
-
 				for {
+					lastID, _ := knownIDs.Get(token)
+
 					chats, err := client.GetChats(url, username, password, token)
 					if err != nil {
 						log.Fatal(err)
@@ -63,7 +65,9 @@ func main() {
 					if chat.ID != lastID {
 						chatChan <- chats[0]
 
-						lastID = chat.ID
+						log.Println(token, lastID, chat.ID)
+
+						knownIDs.Set(token, chat.ID)
 					}
 
 					time.Sleep(time.Second * 5)
