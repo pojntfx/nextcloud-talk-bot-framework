@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/pojntfx/nextcloud-talk-jitsi-bot/pkg/v2/pkg/client"
 )
@@ -19,12 +20,23 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for _, room := range rooms {
-		chats, err := client.GetChats(url, username, password, room.Token)
-		if err != nil {
-			log.Fatal(err)
-		}
+	chatChan := make(chan client.Chat)
+	for i := range rooms {
+		go func(token string) {
+			for {
+				chats, err := client.GetChats(url, username, password, token)
+				if err != nil {
+					log.Fatal(err)
+				}
 
-		log.Println(chats[0])
+				chatChan <- chats[0]
+
+				time.Sleep(time.Second * 5)
+			}
+		}(rooms[i].Token)
+	}
+
+	for chat := range chatChan {
+		log.Println(chat)
 	}
 }
