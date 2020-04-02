@@ -26,9 +26,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := bot.Read(); err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		if err := bot.ReadRooms(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	go func() {
+		if err := bot.ReadChats(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	go func() {
 		for status := range statusChan {
@@ -39,9 +47,11 @@ func main() {
 	for chat := range chatChan {
 		log.Printf(`Received message from "%v" ("%v") in room "%v" with ID "%v": "%v"`, chat.ActorDisplayName, chat.ActorID, chat.Token, chat.ID, chat.Message)
 
-		reg := regexp.MustCompile("^#videochat")
+		reg := regexp.MustCompile("^#video(chat|call)")
 
 		if reg.Match([]byte(chat.Message)) {
+			log.Printf(`"%v" ("%v") has requested a video call in room "%v" with ID "%v"; creating video call.`, chat.ActorDisplayName, chat.ActorID, chat.Token, chat.ID)
+
 			bot.CreateChat(chat.Token, fmt.Sprintf("@%v started a video call. Tap on %v to join!", chat.ActorID, jitsiURL+"/"+chat.Token))
 		}
 	}
