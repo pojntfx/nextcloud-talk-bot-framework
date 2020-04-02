@@ -1,11 +1,13 @@
-FROM node
+FROM golang:alpine AS build
 
 WORKDIR /app
 
-COPY package-lock.json package.json ./
+COPY . .
 
-RUN npm install
+RUN go build -o /tmp/nextcloud-talk-jitsi-bot main.go
 
-COPY main.js proc.js ./
+FROM alpine
 
-CMD node main.js
+COPY --from=build /tmp/nextcloud-talk-jitsi-bot /usr/local/bin
+
+CMD /usr/local/bin/nextcloud-talk-jitsi-bot
