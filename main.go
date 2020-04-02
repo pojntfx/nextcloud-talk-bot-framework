@@ -1,45 +1,58 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"net/url"
 	"os"
+	"regexp"
 
-	"github.com/pojntfx/nextcloud-talk-jitsi-bot/pkg/bots"
-	"github.com/pojntfx/nextcloud-talk-jitsi-bot/pkg/protocol"
+	"github.com/pojntfx/nextcloud-talk-jitsi-bot/pkg/client"
 )
 
 func main() {
-	testUsername := os.Getenv("NEXTCLOUD_USERNAME")
-	testPassword := os.Getenv("NEXTCLOUD_PASSWORD")
-	testURL := os.Getenv("NEXTCLOUD_URL")
-	addr, err := url.Parse(testURL)
-	if err != nil {
+	var (
+		url        = os.Getenv("NEXTCLOUD_URL")
+		username   = os.Getenv("NEXTCLOUD_USERNAME")
+		password   = os.Getenv("NEXTCLOUD_PASSWORD")
+		dbLocation = os.Getenv("DB_LOCATION")
+		jitsiURL   = os.Getenv("JITSI_URL")
+	)
+
+	chatChan, statusChan := make(chan client.Chat), make(chan string)
+	bot := client.NewNextcloudTalk(url, username, password, dbLocation, chatChan, statusChan)
+
+	defer bot.Close()
+	if err := bot.Open(); err != nil {
 		log.Fatal(err)
 	}
 
-	msgChan := make(chan protocol.Message)
-	bot := bots.NewNextcloudTalk(addr, testUsername, testPassword, msgChan)
-
 	go func() {
-		for {
-			if err := bot.ReadRooms(); err != nil {
-				log.Println(err)
-			}
+		if err := bot.ReadRooms(); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
 	go func() {
-		for {
-			if err := bot.ReadMessages(); err != nil {
-				log.Println(err)
-			}
+		if err := bot.ReadChats(); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
-	for {
-		msg := <-msgChan
+	go func() {
+		for status := range statusChan {
+			log.Println(status)
+		}
+	}()
 
-		log.Println(msg)
+	for chat := range chatChan {
+		log.Printf(`Received message from "%v" ("%v") in room "%v" with ID "%v": "%v"`, chat.ActorDisplayName, chat.ActorID, chat.Token, chat.ID, chat.Message)
+
+		reg := regexp.MustCompile("^#video(chat|call)")
+
+		if reg.Match([]byte(chat.Message)) {
+			log.Printf(`"%v" ("%v") has requested a video call in room "%v" with ID "%v"; creating video call.`, chat.ActorDisplayName, chat.ActorID, chat.Token, chat.ID)
+
+			bot.CreateChat(chat.Token, fmt.Sprintf("@%v started a video call. Tap on %v to join!", chat.ActorID, jitsiURL+"/"+chat.Token))
+		}
 	}
 }
