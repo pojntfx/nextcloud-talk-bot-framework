@@ -15,33 +15,62 @@ func main() {
 		password = os.Getenv("NEXTCLOUD_PASSWORD")
 	)
 
-	rooms, err := client.GetRooms(url, username, password)
-	if err != nil {
-		log.Fatal(err)
-	}
+	roomChan := make(chan client.Room)
+	go func() {
+		var lastRooms []client.Room
+
+		for {
+			rooms, err := client.GetRooms(url, username, password)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for _, room := range rooms {
+				exists := false
+
+				for _, lastRoom := range lastRooms {
+					if room.ID == lastRoom.ID {
+						exists = true
+
+						break
+					}
+				}
+
+				if !exists {
+					roomChan <- room
+				}
+			}
+
+			lastRooms = rooms
+
+			time.Sleep(time.Second * 5)
+		}
+	}()
 
 	chatChan := make(chan client.Chat)
-	for i := range rooms {
-		go func(token string) {
-			lastID := 0
+	go func() {
+		for room := range roomChan {
+			go func(token string) {
+				lastID := 0
 
-			for {
-				chats, err := client.GetChats(url, username, password, token)
-				if err != nil {
-					log.Fatal(err)
+				for {
+					chats, err := client.GetChats(url, username, password, token)
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					chat := chats[0]
+					if chat.ID != lastID {
+						chatChan <- chats[0]
+
+						lastID = chat.ID
+					}
+
+					time.Sleep(time.Second * 5)
 				}
-
-				chat := chats[0]
-				if chat.ID != lastID {
-					chatChan <- chats[0]
-
-					lastID = chat.ID
-				}
-
-				time.Sleep(time.Second * 5)
-			}
-		}(rooms[i].Token)
-	}
+			}(room.Token)
+		}
+	}()
 
 	for chat := range chatChan {
 		log.Println(chat)
