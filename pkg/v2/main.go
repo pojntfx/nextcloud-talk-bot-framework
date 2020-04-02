@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -16,6 +18,7 @@ func main() {
 		username   = os.Getenv("NEXTCLOUD_USERNAME")
 		password   = os.Getenv("NEXTCLOUD_PASSWORD")
 		dbLocation = os.Getenv("DB_LOCATION")
+		jitsiURL   = os.Getenv("JITSI_URL")
 	)
 
 	roomChan := make(chan client.Room)
@@ -104,5 +107,11 @@ func main() {
 
 	for chat := range chatChan {
 		log.Printf(`Received message from "%v" ("%v") in room "%v" with ID "%v": "%v"`, chat.ActorDisplayName, chat.ActorID, chat.Token, chat.ID, chat.Message)
+
+		reg := regexp.MustCompile("^#videochat")
+
+		if reg.Match([]byte(chat.Message)) {
+			client.CreateChat(url, username, password, chat.Token, fmt.Sprintf("@%v started a video call. Tap on %v to join!", chat.ActorID, jitsiURL+"/"+chat.Token))
+		}
 	}
 }

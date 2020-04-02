@@ -51,3 +51,21 @@ func GetChats(url, username, password, room string) ([]Chat, error) {
 
 	return resStruct.OCS.Data, nil
 }
+
+// CreateChat creates a chat message in a room
+func CreateChat(url, username, password, room string, message string) error {
+	client := resty.New()
+
+	_, err := client.R().
+		SetHeaders(map[string]string{
+			"OCS-APIRequest": "true",
+			"Accept":         "application/json",
+		}).
+		SetQueryParams(map[string]string{
+			"message": message,
+		}).
+		SetBasicAuth(username, password).
+		Post(url + "/" + path.Join("ocs", "v2.php", "apps", "spreed", "api", "v1", "chat", room))
+
+	return err
+}
