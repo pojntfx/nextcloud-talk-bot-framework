@@ -164,12 +164,14 @@ func (n *NextcloudTalk) ReadChats() error {
 					continue
 				}
 
-				chat := chats[0]
-				if strconv.Itoa(chat.ID) != string(lastID) {
-					n.chatChan <- chats[0]
+				if len(chats) != 0 {
+					chat := chats[0]
+					if strconv.Itoa(chat.ID) != string(lastID) {
+						n.chatChan <- chats[0]
 
-					if err := n.knownIDs.Put([]byte(currentRoom.Token), []byte(strconv.Itoa(chat.ID))); err != nil {
-						n.statusChan <- err.Error()
+						if err := n.knownIDs.Put([]byte(currentRoom.Token), []byte(strconv.Itoa(chat.ID))); err != nil {
+							n.statusChan <- err.Error()
+						}
 					}
 				}
 
