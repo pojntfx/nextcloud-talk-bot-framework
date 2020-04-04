@@ -27,14 +27,18 @@ func main() {
 	}
 
 	go func() {
-		if err := bot.ReadRooms(); err != nil {
-			log.Fatal(err)
+		for {
+			if err := bot.ReadRooms(); err != nil {
+				log.Println(err)
+			}
 		}
 	}()
 
 	go func() {
-		if err := bot.ReadChats(); err != nil {
-			log.Fatal(err)
+		for {
+			if err := bot.ReadChats(); err != nil {
+				log.Println(err)
+			}
 		}
 	}()
 
