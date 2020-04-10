@@ -99,18 +99,20 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 
 		go func() {
 			for status := range statusChan {
-				log.Info("Received Nextcloud client status", rz.String("status", status))
+				log.Info("received Nextcloud client status", rz.String("status", status))
 			}
 		}()
 
 		go func() {
 			for status := range svcStatusChan {
-				log.Info("Received service status", rz.String("status", status))
+				log.Info("received service status", rz.String("status", status))
 			}
 		}()
 
 		go func() {
 			for range chatRequestChan {
+				log.Info("new client connected to service")
+
 				chatChan := make(chan clients.Chat)
 
 				chatChans = append(chatChans, chatChan)
