@@ -59,7 +59,7 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 		chatRequestChan := make(chan bool)
 		chatChans := []chan clients.Chat{}
 		chatResponseChan := make(chan chan clients.Chat)
-		statusChan := make(chan string)
+		statusChan, svcStatusChan := make(chan string), make(chan string)
 
 		nextcloudTalkClient := clients.NewNextcloudTalk(
 			viper.GetString(raddrKey),
@@ -99,7 +99,13 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 
 		go func() {
 			for status := range statusChan {
-				log.Info(status)
+				log.Info("Received Nextcloud client status", rz.String("status", status))
+			}
+		}()
+
+		go func() {
+			for status := range svcStatusChan {
+				log.Info("Received service status", rz.String("status", status))
 			}
 		}()
 
@@ -123,7 +129,7 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 			}
 		}()
 
-		nextcloudTalkService := services.NewNextcloudTalk(chatRequestChan, chatResponseChan, writeChan)
+		nextcloudTalkService := services.NewNextcloudTalk(chatRequestChan, chatResponseChan, svcStatusChan, writeChan)
 
 		nextcloudTalk.RegisterNextcloudTalkServer(server, nextcloudTalkService)
 

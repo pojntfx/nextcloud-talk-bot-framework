@@ -16,14 +16,16 @@ type NextcloudTalk struct {
 	nextcloudTalk.UnimplementedNextcloudTalkServer
 	chatRequestChan  chan bool
 	chatResponseChan chan chan clients.Chat
+	statusChan       chan string
 	writeChat        func(token, message string) error
 }
 
 // NewNextcloudTalk creates a new Nextcloud Talk Client.
-func NewNextcloudTalk(chatRequestChan chan bool, chatResponseChan chan chan clients.Chat, writeChat func(token, message string) error) *NextcloudTalk {
+func NewNextcloudTalk(chatRequestChan chan bool, chatResponseChan chan chan clients.Chat, statusChan chan string, writeChat func(token, message string) error) *NextcloudTalk {
 	return &NextcloudTalk{
 		chatRequestChan:  chatRequestChan,
 		chatResponseChan: chatResponseChan,
+		statusChan:       statusChan,
 		writeChat:        writeChat,
 	}
 }
@@ -35,15 +37,17 @@ func (n *NextcloudTalk) ReadChats(req *empty.Empty, srv nextcloudTalk.NextcloudT
 	readChan := <-n.chatResponseChan
 
 	for chat := range readChan {
-		if err := srv.Send(&nextcloudTalk.OutChat{
-			ID:               int64(chat.ID),
-			Token:            chat.Token,
-			ActorID:          chat.ActorID,
-			ActorDisplayName: chat.ActorDisplayName,
-			Message:          chat.Message,
-		}); err != nil {
-			return err
-		}
+		go func(ichat *clients.Chat) {
+			if err := srv.Send(&nextcloudTalk.OutChat{
+				ID:               int64(ichat.ID),
+				Token:            ichat.Token,
+				ActorID:          ichat.ActorID,
+				ActorDisplayName: ichat.ActorDisplayName,
+				Message:          ichat.Message,
+			}); err != nil {
+				n.statusChan <- err.Error()
+			}
+		}(&chat)
 	}
 
 	return nil
