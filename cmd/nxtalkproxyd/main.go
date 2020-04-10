@@ -3,7 +3,6 @@ package main
 import (
 	"net"
 	"strings"
-	"time"
 
 	"github.com/pojntfx/nextcloud-talk-bot-framework/cmd"
 	"github.com/pojntfx/nextcloud-talk-bot-framework/pkg/clients"
@@ -60,23 +59,47 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 		chatRequestChan := make(chan bool)
 		chatChans := []chan clients.Chat{}
 		chatResponseChan := make(chan chan clients.Chat)
+		statusChan := make(chan string)
+
+		nextcloudTalkClient := clients.NewNextcloudTalk(
+			viper.GetString(raddrKey),
+			viper.GetString(usernameKey),
+			viper.GetString(passwordKey),
+			viper.GetString(dbpathKey),
+			chatChan,
+			statusChan,
+		)
+
 		writeChan := func(token, message string) error {
 			log.Info("writing chat from client to Nextcloud Talk", rz.String("token", token), rz.String("message", message))
 
-			return nil
+			return nextcloudTalkClient.WriteChat(token, message)
+		}
+
+		defer nextcloudTalkClient.Close()
+		if err := nextcloudTalkClient.Open(); err != nil {
+			log.Fatal("Could not open Nextcloud Talk client", rz.Err(err))
 		}
 
 		go func() {
 			for {
-				chatChan <- clients.Chat{
-					ID:               1,
-					Token:            "testToken",
-					ActorID:          "testActorID",
-					ActorDisplayName: "testDisplayName",
-					Message:          "testMessage",
+				if err := nextcloudTalkClient.ReadRooms(); err != nil {
+					log.Info("could not read rooms, retrying", rz.Err(err))
 				}
+			}
+		}()
 
-				time.Sleep(time.Second * 2)
+		go func() {
+			for {
+				if err := nextcloudTalkClient.ReadChats(); err != nil {
+					log.Info("could not read chats, retrying", rz.Err(err))
+				}
+			}
+		}()
+
+		go func() {
+			for status := range statusChan {
+				log.Info(status)
 			}
 		}()
 
