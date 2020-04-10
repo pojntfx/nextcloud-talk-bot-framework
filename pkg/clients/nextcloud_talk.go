@@ -130,7 +130,7 @@ func (n *NextcloudTalk) ReadRooms() error {
 // ReadChats reads the chats.
 func (n *NextcloudTalk) ReadChats() error {
 	for room := range n.roomChan {
-		n.statusChan <- fmt.Sprintf(`Joined room "%v" ("%v") with ID "%v" and token "%v"`, room.DisplayName, room.Name, room.ID, room.Token)
+		n.statusChan <- fmt.Sprintf(`joined room "%v" ("%v") with ID "%v" and token "%v"`, room.DisplayName, room.Name, room.ID, room.Token)
 
 		go func(currentRoom Room) {
 			for {
@@ -154,7 +154,7 @@ func (n *NextcloudTalk) ReadChats() error {
 				chats, err := n.getChats(currentRoom.Token)
 				if err != nil {
 					if err.Error() == "invalid character '<' looking for beginning of value" {
-						n.statusChan <- fmt.Sprintf(`Left room "%v" ("%v") with ID "%v" and token "%v"`, currentRoom.DisplayName, currentRoom.Name, currentRoom.ID, currentRoom.Token)
+						n.statusChan <- fmt.Sprintf(`left room "%v" ("%v") with ID "%v" and token "%v"`, currentRoom.DisplayName, currentRoom.Name, currentRoom.ID, currentRoom.Token)
 
 						return
 					}

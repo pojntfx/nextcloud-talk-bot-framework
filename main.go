@@ -6,7 +6,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/pojntfx/nextcloud-talk-jitsi-bot/pkg/client"
+	client "github.com/pojntfx/nextcloud-talk-bot-framework/pkg/clients"
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 		if reg.Match([]byte(chat.Message)) {
 			log.Printf(`"%v" ("%v") has requested a video call in room "%v" with ID "%v"; creating video call.`, chat.ActorDisplayName, chat.ActorID, chat.Token, chat.ID)
 
-			bot.CreateChat(chat.Token, fmt.Sprintf("@%v started a video call. Tap on %v to join!", chat.ActorID, jitsiURL+"/"+chat.Token))
+			bot.WriteChat(chat.Token, fmt.Sprintf("@%v started a video call. Tap on %v to join!", chat.ActorID, jitsiURL+"/"+chat.Token))
 		}
 	}
 }
