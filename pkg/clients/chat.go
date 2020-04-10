@@ -1,6 +1,6 @@
-package client
+package clients
 
-// Chat is a chat message
+// Chat is a chat message.
 type Chat struct {
 	ID               int    `json:"id"`
 	Token            string `json:"token"`
@@ -9,7 +9,7 @@ type Chat struct {
 	Message          string `json:"message"`
 }
 
-// ChatResponse is the API response for chats
+// ChatResponse is the API response for chats.
 type ChatResponse struct {
 	OCS struct {
 		Data []Chat `json:"data"`

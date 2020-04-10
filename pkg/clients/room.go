@@ -1,4 +1,4 @@
-package client
+package clients
 
 // Room is a chat room
 type Room struct {
