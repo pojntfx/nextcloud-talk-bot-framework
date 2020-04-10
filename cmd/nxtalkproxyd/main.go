@@ -78,7 +78,7 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 
 		defer nextcloudTalkClient.Close()
 		if err := nextcloudTalkClient.Open(); err != nil {
-			log.Fatal("Could not open Nextcloud Talk client", rz.Err(err))
+			log.Fatal("could not open Nextcloud Talk client", rz.Err(err))
 		}
 
 		go func() {
