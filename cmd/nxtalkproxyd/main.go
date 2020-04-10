@@ -113,9 +113,19 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 func init() {
 	var (
 		configFileFlag string
+		laddrFlag      string
+		raddrFlag      string
+		usernameFlag   string
+		passwordFlag   string
+		dbpathFlag     string
 	)
 
 	rootCmd.PersistentFlags().StringVarP(&configFileFlag, configFileKey, "f", configFileDefault, cmd.ConfigurationFileDocs)
+	rootCmd.PersistentFlags().StringVarP(&laddrFlag, laddrKey, "l", cmd.NXTalkProxyDDefaultLaddr, "Listen address.")
+	rootCmd.PersistentFlags().StringVarP(&raddrFlag, raddrKey, "r", "https://examplenextcloud.com", "Nextcloud address.")
+	rootCmd.PersistentFlags().StringVarP(&usernameFlag, usernameKey, "u", "botusername", "Nextcloud bot account username.")
+	rootCmd.PersistentFlags().StringVarP(&passwordFlag, passwordKey, "p", "botpassword", "Nextcloud bot account password.")
+	rootCmd.PersistentFlags().StringVarP(&dbpathFlag, dbpathKey, "d", "/var/lib/nxtalkproxyd", "Database path.")
 
 	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
 		log.Fatal(cmd.CouldNotBindFlagsErrorMessage, rz.Err(err))
