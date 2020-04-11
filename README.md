@@ -16,7 +16,7 @@ A Go package [is available](https://pkg.go.dev/mod/github.com/pojntfx/nextcloud-
 
 ### Docker Image
 
-A Docker image is available at [Docker Hub](https://hub.docker.com/r/pojntfx/nextcloud-talk-bot-jitsi).
+A Docker image is available at [Docker Hub](https://hub.docker.com/r/pojntfx/nxtalkproxyd).
 
 ### Others
 
@@ -41,17 +41,17 @@ To then start using your bot, you can connect your bot to `nxtalkproxyd` like so
     -e NXTALKPROXYD_NXTALKPROXYD_PASSWORD=botpassword \
     -e NXTALKPROXYD_NXTALKPROXYD_RADDR=https://examplenextcloud.com \
     --network nxtalkchatbots \
-    --name nxtalkproxy \
-    -d pojntfx/nxtalkproxy
+    --name nxtalkproxyd \
+    -d pojntfx/nxtalkproxyd
 % docker run \
     -e BOT_JITSI_ADDR=meet.jit.si \
     -e BOT_JITSI_BOT_NAME=botusername \
     -e BOT_JITSI_SLEEP_TIME=20 \
-    -e BOT_NXTALKPROXYD_ADDR=nxtalkproxy:1969 \
+    -e BOT_NXTALKPROXYD_ADDR=nxtalkproxyd:1969 \
     -e BOT_JITSI_ROOM_PASSWORD_BYTE_LENGTH=1 \
     -e BOT_COMMANDS=\#videochat,\#videocall,\#custom \
     --network nxtalkchatbots \
-    -d pojntfx/nextcloud-talk-bot-jits
+    -d pojntfx/nextcloud-talk-bot-jitsi
 ```
 
 ## License
