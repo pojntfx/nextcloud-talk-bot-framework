@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package nextcloudTalk;
+
+import "google/protobuf/empty.proto";
+
+// NextcloudTalk is a Nextcloud Talk client.
+service NextcloudTalk {
+  rpc ReadChats(google.protobuf.Empty) returns (stream OutChat);
+  rpc WriteChat(InChat) returns (google.protobuf.Empty);
+}
+
+message OutChat {
+  int64 ID = 1;
+  string Token = 2;
+  string ActorID = 3;
+  string ActorDisplayName = 4;
+  string Message = 5;
+}
+
+message InChat {
+  string Token = 1;
+  string Message = 2;
+}
