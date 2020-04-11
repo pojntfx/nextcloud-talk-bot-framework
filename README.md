@@ -1,115 +1,61 @@
-# Nextcloud Talk Jitsi Bot
+# Nextcloud Talk Bot Framework
 
-A chat bot for Nextcloud Talk that creates [Jitsi](https://jitsi.org) video chat meetings.
-It also includes a framework for building Nextcloud Talk chatbots.
+A framework for writing Nextcloud Talk chatbots with every language that supports gRPC.
+
+Looking for the Nextcloud Talk Jitsi Bot? It has been re-written as a client for this framework at [pojntfx/nextcloud-talk-bot-jitsi](https://github.com/pojntfx/nextcloud-talk-bot-jitsi)!
 
 ## Overview
 
-Nextcloud Talk Jitsi Bot creates ad-hoc Jitsi meetings from Nextcloud Talk sessions.
-
-The talk sessions needs to be aware of the bot. Just create a new user for the bot inside your trusted Nextcloud domain.
-Its username needs to reflect the `BOT_NEXTCLOUD_USERNAME` environment variable. The bot binary will resolve it and interact with Nextcloud Talk over it's API.
-
-When you start a talk session, please add the bot user you've added as a participant of your room. Once done, you can type `#videocall` or `#videochat`. A newly created link to a Jitsi meeting will be advertised!
+The Nextcloud Talk Bot Framework provides a way to create chatbots for Nextcloud in any language that supports gRPC. To do so, `nxtalkproxyd` - a streaming gRPC API for Nextcloud Talk - is the primary part of the framework; in order for you to create a chatbot, you just have to write a client for `nxtalkproxyd`, which will take care of all the heavy lifting for you!
 
 ## Installation
 
-### Go module
+### Go Package
 
-A Go package is available from the GitHub Go Module Registry: [pkg.go.dev](https://pkg.go.dev/mod/github.com/pojntfx/nextcloud-talk-jitsi-bot).
+A Go package [is available](https://pkg.go.dev/mod/github.com/pojntfx/nextcloud-talk-bot-framework).
 
 ### Docker Image
 
-A Docker image is available at [Docker Hub](https://hub.docker.com/r/pojntfx/nextcloud-talk-jitsi-bot).
+A Docker image is available at [Docker Hub](https://hub.docker.com/r/pojntfx/nextcloud-talk-bot-jitsi).
 
-Pull the image:
+### Others
 
-```bash
-$ docker pull hub.docker.com/pojntfx/nextcloud-talk-jitsi-bot
-```
-
-### OCI Image
-
-An Open Containers Initiative (OCI) image is available at
-[Quay.io](https://quay.io/rzerres/nextcloud-talk-jitsi-bot).
-
-Pull the image:
-
-```bash
-$ podman pull quay.io/rzerres/nextcloud-talk-jitsi-bot:latest
-```
+If you're interested in using alternatives like OCI images, see [OCI](./OCI.md).
 
 ## Usage
 
-You might also add a group
-`nextcloud-talk-jitsi-bot` gets all needed parameters via customisable environment variables.
-Please adapt them as appropriate and start the bot binary with reference to this environment.
+As explained above, all you have to to write a chatbot is to implement a client for `nxtalkproxyd`! Take a look at [pkg/protos/nextcloud_talk.proto](./pkg/protos/nextcloud_talk.proto) for the protocol. A pretty advanced chatbot that is based on this framework is the [Nextcloud Talk Jitsi Bot](https://github.com/pojntfx/nextcloud-talk-bot-jitsi), so if you want to have a quick start take a look at the repo.
 
-### Docker image
+`nxtalkproxyd` requires a user to work with; every Nextcloud Talk room that should be able to use the bots connected to it has to add this user.
 
-Please adapt then environment varialbles as needed. You can run the image like:
+To then start using your bot, you can connect your bot to `nxtalkproxyd` like so (this is the way that the Nextcloud Talk Jitsi Bot does it; don't forget to change i.e. the username and password, it is just an example):
 
 ```bash
-$ docker volume create nextcloud-talk-jitsi-bot # This is required so that messages don't get send twice
-$ docker run \
-	-e BOT_NEXTCLOUD_USERNAME="jitsibot" \
-	-e BOT_NEXTCLOUD_PASSWORD="password" \
-	-e BOT_DB_LOCATION="/run/nextcloud-jitsi-bot" \
-	-e BOT_NEXTCLOUD_URL="https://localhost:8443" \
-	-e BOT_JITSI_URL="https://meet.jit.si" \
-	-v nextcloud-talk-jitsi-bot:/var/lib/nextcloud-jitsi-bot \
-	-d \
-	pojntfx/nextcloud-talk-jitsi-bot
+% docker volume create nxtalkproxyd
+% docker network create nxtalkchatbots
+% docker run \
+    -p 1969:1969 \
+    -v nxtalkproxyd:/var/lib/nxtalkproxyd \
+    -e NXTALKPROXYD_NXTALKPROXYD_DBPATH=/var/lib/nxtalkproxyd \
+    -e NXTALKPROXYD_NXTALKPROXYD_USERNAME=botusername \
+    -e NXTALKPROXYD_NXTALKPROXYD_PASSWORD=botpassword \
+    -e NXTALKPROXYD_NXTALKPROXYD_RADDR=https://examplenextcloud.com \
+    --network nxtalkchatbots \
+    --name nxtalkproxy \
+    -d pojntfx/nxtalkproxy
+% docker run \
+    -e BOT_JITSI_ADDR=meet.jit.si \
+    -e BOT_JITSI_BOT_NAME=botusername \
+    -e BOT_JITSI_SLEEP_TIME=20 \
+    -e BOT_NXTALKPROXYD_ADDR=nxtalkproxy:1969 \
+    -e BOT_JITSI_ROOM_PASSWORD_BYTE_LENGTH=1 \
+    -e BOT_COMMANDS=\#videochat,\#videocall,\#custom \
+    --network nxtalkchatbots \
+    -d pojntfx/nextcloud-talk-bot-jits
 ```
-
-### OCI image
-
-On a `systemd` capable distro, you OCI images can be managed combining a `systemd.service` with the `podman`
-binary. If you are not familiar with `podman` yet, you might simply put: `alias docker=podman`. Beside using
-it as a drop-in replacement for docker, there are a couple of advanteges:
-
-- OCI compliant
-- rootless and root mode
-- daemonless
-- direct interaction with Container Registy, Containers, Image Storage and runc
-
-To create the systemd.service, run
-
-```bash
-$ podman create --detach --name nextcloud-talk-jitsi-bot nextcloud-talk-jitsi-bot:latest
-$ podman generate systemd --name nextcloud-talk-jitsi-bot > /etc/systemd/system/nextcloud-talk-jitsi-bot.service
-```
-
-Have a look at [running containers with podman](https://www.redhat.com/sysadmin/podman-shareable-systemd-services)
-to get more insightdetails.
-
-```bash
-$ systemctl edit --full nextcloud-talk-jitsi-bot.service
-```
-
-Adapt the environment variables with appropriate values. They are configured with following defaults:
-
-```env
-BOT_NEXTCLOUD_USERNAME="jitsibot"
-BOT_NEXTCLOUD_PASSWORD="password"
-BOT_DB_LOCATION="/run/nextcloud-jitsi-bot"
-BOT_NEXTCLOUD_URL="https://localhost:8443"
-BOT_JITSI_URL="https://meet.jit.si"
-```
-
-Finally start the service.
-
-```bash
-$ systemctl enable nextcloud-talk-jitsi-bot.service
-$ systemctl start nextcloud-talk-jitsi-bot.service
-```
-
-## Build
-
-See [CONTRIBUTING](./CONTRIBUTING.md) for more information.
 
 ## License
 
-Nextcloud Talk Jitsi Bot (c) 2020 Felix Pojtinger
+Nextcloud Talk Bot Framework (c) 2020 Felix Pojtinger
 
 SPDX-License-Identifier: AGPL-3.0

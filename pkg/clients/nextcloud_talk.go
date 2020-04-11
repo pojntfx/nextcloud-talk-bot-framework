@@ -1,4 +1,4 @@
-package client
+package clients
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// NextcloudTalk is a Nextcloud Talk Chatbot
+// NextcloudTalk is a Nextcloud Talk client.
 type NextcloudTalk struct {
 	url, username, password, dbLocation string
 	chatChan                            chan Chat
@@ -20,7 +20,7 @@ type NextcloudTalk struct {
 	knownIDs                            *pogreb.DB
 }
 
-// NewNextcloudTalk creates a new Nextcloud Talk Chatbot
+// NewNextcloudTalk creates a new Nextcloud Talk Client.
 func NewNextcloudTalk(url, username, password, dbLocation string, chatChan chan Chat, statusChan chan string) *NextcloudTalk {
 	return &NextcloudTalk{
 		url, username, password, dbLocation, chatChan, make(chan Room), statusChan, nil,
@@ -79,7 +79,7 @@ func (n *NextcloudTalk) getChats(room string) ([]Chat, error) {
 	return resStruct.OCS.Data, nil
 }
 
-// Open opens the bot
+// Open opens the client.
 func (n *NextcloudTalk) Open() error {
 	knownIDs, err := pogreb.Open(n.dbLocation, nil)
 	if err != nil {
@@ -90,12 +90,12 @@ func (n *NextcloudTalk) Open() error {
 	return nil
 }
 
-// Close closes the chat bot
+// Close closes the client.
 func (n *NextcloudTalk) Close() error {
 	return n.knownIDs.Close()
 }
 
-// ReadRooms starts reading rooms
+// ReadRooms reads the rooms.
 func (n *NextcloudTalk) ReadRooms() error {
 	var lastRooms []Room
 
@@ -127,10 +127,10 @@ func (n *NextcloudTalk) ReadRooms() error {
 	}
 }
 
-// ReadChats starts reading chats
+// ReadChats reads the chats.
 func (n *NextcloudTalk) ReadChats() error {
 	for room := range n.roomChan {
-		n.statusChan <- fmt.Sprintf(`Joined room "%v" ("%v") with ID "%v" and token "%v"`, room.DisplayName, room.Name, room.ID, room.Token)
+		n.statusChan <- fmt.Sprintf(`joined room "%v" ("%v") with ID "%v" and token "%v"`, room.DisplayName, room.Name, room.ID, room.Token)
 
 		go func(currentRoom Room) {
 			for {
@@ -154,7 +154,7 @@ func (n *NextcloudTalk) ReadChats() error {
 				chats, err := n.getChats(currentRoom.Token)
 				if err != nil {
 					if err.Error() == "invalid character '<' looking for beginning of value" {
-						n.statusChan <- fmt.Sprintf(`Left room "%v" ("%v") with ID "%v" and token "%v"`, currentRoom.DisplayName, currentRoom.Name, currentRoom.ID, currentRoom.Token)
+						n.statusChan <- fmt.Sprintf(`left room "%v" ("%v") with ID "%v" and token "%v"`, currentRoom.DisplayName, currentRoom.Name, currentRoom.ID, currentRoom.Token)
 
 						return
 					}
@@ -183,8 +183,8 @@ func (n *NextcloudTalk) ReadChats() error {
 	return nil
 }
 
-// CreateChat creates a chat message in a room
-func (n *NextcloudTalk) CreateChat(room string, message string) error {
+// WriteChat writes a chat.
+func (n *NextcloudTalk) WriteChat(room string, message string) error {
 	client := resty.New()
 
 	_, err := client.R().
