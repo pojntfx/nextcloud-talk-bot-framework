@@ -43,7 +43,7 @@ buildah config --workingdir="$buildroot" $mycontainer
 
 # create the binary
 #buildah run $mycontainer mkdir -p $buildroot/pkg
-buildah copy $mycontainer src
+buildah copy $mycontainer .
 buildah run $mycontainer go build -o $buildroot/$botname main.go
 
 # prepare the destination container
