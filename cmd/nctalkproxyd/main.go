@@ -17,25 +17,25 @@ import (
 )
 
 const (
-	keyPrefix         = "nxtalkproxyd."
-	configFileDefault = ""
+	keyPrefix         = "nctalkproxyd."
+	configFileDefault = "/etc/" + keyPrefix + "yaml"
 	configFileKey     = keyPrefix + "configFile"
-	laddrKey          = keyPrefix + "laddr"
-	raddrKey          = keyPrefix + "raddr"
+	addrLocaleKey     = keyPrefix + "addrLocale"
+	addrRemoteKey     = keyPrefix + "addrRemote"
 	usernameKey       = keyPrefix + "username"
 	passwordKey       = keyPrefix + "password"
 	dbpathKey         = keyPrefix + "dbpath"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "nxtalkproxyd",
-	Short: "nxtalkproxyd is a Nextcloud Talk API gRPC proxy daemon.",
-	Long: `nxtalkproxyd is a Nextcloud Talk API gRPC proxy daemon.
+	Use:   "nctalkproxyd",
+	Short: "nctalkproxyd is a Nextcloud Talk API gRPC proxy daemon.",
+	Long: `nctalkproxyd is a Nextcloud Talk API gRPC proxy daemon.
 
 Find more information at:
-https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
+https://pojntfx.github.io/nextcloud-talk-bot/`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		viper.SetEnvPrefix("nxtalkproxyd")
+		viper.SetEnvPrefix("nctalkproxyd")
 		viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -47,7 +47,7 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 			}
 		}
 
-		listener, err := net.Listen("tcp", viper.GetString(laddrKey))
+		listener, err := net.Listen("tcp", viper.GetString(addrLocaleKey))
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 		statusChan, svcStatusChan := make(chan string), make(chan string)
 
 		nextcloudTalkClient := clients.NewNextcloudTalk(
-			viper.GetString(raddrKey),
+			viper.GetString(addrRemoteKey),
 			viper.GetString(usernameKey),
 			viper.GetString(passwordKey),
 			viper.GetString(dbpathKey),
@@ -144,19 +144,19 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 func init() {
 	var (
 		configFileFlag string
-		laddrFlag      string
-		raddrFlag      string
+		addrLocaleFlag string
+		addrRemoteFlag string
 		usernameFlag   string
 		passwordFlag   string
 		dbpathFlag     string
 	)
 
-	rootCmd.PersistentFlags().StringVarP(&configFileFlag, configFileKey, "f", configFileDefault, cmd.ConfigurationFileDocs)
-	rootCmd.PersistentFlags().StringVarP(&laddrFlag, laddrKey, "l", cmd.NXTalkProxyDDefaultLaddr, "Listen address.")
-	rootCmd.PersistentFlags().StringVarP(&raddrFlag, raddrKey, "r", "https://examplenextcloud.com", "Nextcloud address.")
+	rootCmd.PersistentFlags().StringVarP(&configFileFlag, configFileKey, "f", configFileDefault, cmd.NcTalkProxyConfigurationFile)
+	rootCmd.PersistentFlags().StringVarP(&addrLocaleFlag, addrLocaleKey, "l", cmd.NcTalkProxydDefaultAddrLocal, "Listen address.")
+	rootCmd.PersistentFlags().StringVarP(&addrRemoteFlag, addrRemoteKey, "r", "https://mynextcloud.com", "Nextcloud address.")
 	rootCmd.PersistentFlags().StringVarP(&usernameFlag, usernameKey, "u", "botusername", "Nextcloud bot account username.")
 	rootCmd.PersistentFlags().StringVarP(&passwordFlag, passwordKey, "p", "botpassword", "Nextcloud bot account password.")
-	rootCmd.PersistentFlags().StringVarP(&dbpathFlag, dbpathKey, "d", "/var/lib/nxtalkproxyd", "Database path.")
+	rootCmd.PersistentFlags().StringVarP(&dbpathFlag, dbpathKey, "d", "/var/lib/nctalkproxyd", "Database path.")
 
 	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
 		log.Fatal(cmd.CouldNotBindFlagsErrorMessage, rz.Err(err))
