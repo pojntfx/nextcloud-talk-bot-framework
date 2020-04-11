@@ -22,7 +22,7 @@ type NextcloudTalk struct {
 
 // NewNextcloudTalk creates a new Nextcloud Talk Chatbot
 func NewNextcloudTalk(url, username, password, dbLocation string, chatChan chan Chat, statusChan chan string) *NextcloudTalk {
-	return &NextcloudTalk {
+	return &NextcloudTalk{
 		url, username, password, dbLocation, chatChan, make(chan Room), statusChan, nil,
 	}
 }
