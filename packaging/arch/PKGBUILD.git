@@ -1,0 +1,65 @@
+# vim:set ts=8 sw=8 et:
+# Maintainer: Ralf Zerres <ralf.zerres@networkx.de>
+
+pkgname=nextcloud-talk-jitsi-bot-git
+_pkgname=nextcloud-talk-jitsi-bot
+_branch=master
+pkgver=0.r27.g0ccdd6f
+pkgrel=1
+pkgdesc="A chat bot framework for Nextcloud Talk to handle Jitsi sessions"
+url="https://github.com/pojntfx/nextcloud-talk-jitsi-bot"
+depends=('go')
+makedepends=('go')
+#backup=("etc/webapps/nextcloud/nextcloud-talk-jitsi-bot.cfg")
+arch=('x86_64')
+license=('GPL')
+source=("${pkgname}::git+https://github.com/pojntfx/${_pkgname}.git#branch=${_branch}")
+#install=_$pkgname.install
+provides=("$_pkgname")
+#conflicts=('$_pkgname')
+
+sha256sums=('SKIP')
+validpgpkeys=(
+		'1EC4BE4FF2A6C9F4DDDF30F33C5F485DBD250D66' # Ralf Zerres (Package Signing)
+	)
+
+prepare() {
+	cd "$srcdir"/${pkgbase}
+
+	# check out given branch and update to head
+	git checkout $_branch
+	echo "prepare: pull $_branch"
+	git pull --rebase
+
+	# patching
+	if [ ! -f .makepkg-patched ]; then
+		msg2 "patching:"
+		#git am --signoff ../../patches-git/0002-packaging-Arch-Linux-update-PKGBUILD.git.patch
+		touch .makepkg-patched
+		msg2 "no patches for branch '${_branch}' needed"
+
+		cp -ax ../../usr .
+		cp -ax ../../packaging .
+	fi
+}
+
+pkgver() {
+	cd "${srcdir}/${pkgname}"
+	echo "0.r$(git rev-list --count $_branch).g$(git log -1 --format="%h")"
+}
+
+build() {
+	cd "$srcdir"/${pkgbase}
+
+	# create binary targets
+	go build -o $_pkgname main.go
+}
+
+package() {
+	cd "$srcdir"/${pkgbase}
+
+	# install app only, excluding console, modules and modules docs
+	mkdir -p "$pkgdir"/usr/bin
+	install --mode 0750 "./${_pkgname}" "$pkgdir"/usr/bin/$_pkgname
+	install -D --mode 0644 "./usr/lib/systemd/system/${_pkgname}.service" "$pkgdir"/usr/lib/systemd/system/${_pkgname}.service
+}

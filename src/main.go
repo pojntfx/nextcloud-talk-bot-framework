@@ -18,6 +18,8 @@ func main() {
 		jitsiURL   = os.Getenv("BOT_JITSI_URL")
 	)
 
+	log.Printf(`Starting NextcloudTalk-Jitsi-Bot on "%v" (Jitsi: "%v")`, url, jitsiURL)
+
 	chatChan, statusChan := make(chan client.Chat), make(chan string)
 	bot := client.NewNextcloudTalk(url, username, password, dbLocation, chatChan, statusChan)
 
