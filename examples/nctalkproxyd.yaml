@@ -1,0 +1,6 @@
+nctalkproxyd:
+  addrLocale: :1969
+  addrRemote: https://examplenextcloud.com
+  username: botusername
+  password: botpassword
+  dbpath: /var/lib/nctalkproxyd

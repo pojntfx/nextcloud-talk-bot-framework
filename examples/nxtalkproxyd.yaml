@@ -1,6 +1,0 @@
-nxtalkproxyd:
-  laddr: :1969
-  raddr: https://examplenextcloud.com
-  username: botusername
-  password: botpassword
-  dbpath: /var/lib/nxtalkproxyd

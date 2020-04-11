@@ -1,8 +1,8 @@
 package cmd
 
 const (
-	NXTalkProxyDDefaultLaddr = ":1969"                      // NXTalkProxyDDefaultLaddr is the default Host:port of `nxtalkproxyd`.
-	ConfigurationFileDocs    = "Configuration file to use." // ConfigurationFileDocs is the documentation for the configuration file flag.
+	NcTalkProxydDefaultAddrLocal = ":1969"                      // NcTalkProxydDefaultAddrLocal is the default Host:port of `nctalkproxyd`.
+	NcTalkProxyConfigurationFile = "Configuration file."        // NcTalkProxydConfigurationFile is the name of the configuration file.
 )
 
 const (
