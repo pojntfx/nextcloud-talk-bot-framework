@@ -4,6 +4,10 @@ A framework for writing Nextcloud Talk chatbots with every language that support
 
 Looking for the Nextcloud Talk Jitsi Bot? It has been re-written as a client for this framework at [pojntfx/nextcloud-talk-bot-jitsi](https://github.com/pojntfx/nextcloud-talk-bot-jitsi)!
 
+Take a look at the following introduction video:
+
+[![thumbnail](https://i3.ytimg.com/vi/WRYlHDGApZo/maxresdefault.jpg)](https://www.youtube.com/watch?v=WRYlHDGApZo)
+
 ## Overview
 
 The Nextcloud Talk Bot Framework provides a way to create chatbots for Nextcloud in any language that supports gRPC. To do so, `nxtalkproxyd` - a streaming gRPC API for Nextcloud Talk - is the primary part of the framework; in order for you to create a chatbot, you just have to write a client for `nxtalkproxyd`, which will take care of all the heavy lifting for you!
