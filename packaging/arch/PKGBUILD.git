@@ -3,17 +3,17 @@
 
 pkgname=nctalkproxyd-git
 _pkgname=nctalkproxyd
-_branch=master
+_branch=wip-nctalkproxyd
 pkgver=0.r54.ge561a3d
 pkgrel=1
 pkgdesc="A Nextcloud Talk API gRPC proxy daemon"
-url="https://github.com/pojntfx/nextcloud-talk-bot-framework"
+url="https://github.com/rzerres/nextcloud-talk-bot-framework"
 depends=('go')
 makedepends=('go')
 backup=("etc/nctalkproxyd.yaml")
 arch=('x86_64')
 license=('GPL')
-source=("${pkgname}::git+https://github.com/pojntfx/nextcloud-talk-bot-framework.git#branch=${_branch}")
+source=("${pkgname}::git+https://github.com/rzerres/nextcloud-talk-bot-framework.git#branch=${_branch}")
 #install=_$pkgname.install
 provides=("$_pkgname")
 #conflicts=('$_pkgname')
@@ -51,7 +51,7 @@ build() {
 	cd "$srcdir"/${pkgname}
 
 	# create binary targets
-	go build -o $_pkgname cmd/${pkgname}/main.go
+	go build -o $_pkgname cmd/${_pkgname}/main.go
 }
 
 package() {
