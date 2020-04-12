@@ -1,19 +1,20 @@
-#!/bin/bash
+#!/bin/sh
 
 set -x
 
 ###
-# buildah: creating a Nextcloud-Talk jitsi bot container (OCI format)
+# buildah: creating a container for Nextcloud-Talk proxy daemon (OCI format)
 ###
 
-push_image=false
+push_image=0
+mount_image=1
 
 # variables
 author='Felix Pojtinger @pojntfx'
 maintainer='Ralf Zerres @rzerres'
-botname=nextcloud-talk-jitsi-bot
+botname=nctalkproxyd
 buildroot=/run/buildah
-prefixbin=/usr/local/bin
+prefix=/usr/local
 
 # signing with GPG Package-Key
 signkey=1EC4BE4FF2A6C9F4DDDF30F33C5F485DBD250D66
@@ -41,31 +42,54 @@ buildah config --env BOT_JITSI_URL="https://meet.jit.si" $mycontainer
 buildah config --entrypoint "[ \"/usr/local/bin/$botname\" ]" $mycontainer
 buildah config --workingdir="$buildroot" $mycontainer
 
-# create the binary
-#buildah run $mycontainer mkdir -p $buildroot/pkg
+# get dependencies
+buildah run $mycontainer apk add --no-cache --virtual .build-deps protobuf git
+buildah run $mycontainer go get github.com/golang/protobuf/protoc-gen-go
 buildah copy $mycontainer .
-buildah run $mycontainer go build -o $buildroot/$botname main.go
+
+# create the binary
+buildah run $mycontainer go build -o $buildroot/$botname ./cmd/$botname/main.go
 
 # prepare the destination container
-buildah run $mycontainer cp $buildroot/$botname $prefixbin/$botname
+buildah run $mycontainer mkdir -p $prefix/etc
+buildah run $mycontainer cp $buildroot/$botname $prefix/bin/$botname
+buildah run $mycontainer cp $buildroot/examples/$botname.yaml $prefix/etc/$botname.yaml
+buildah run $mycontainer ln -s $prefix/etc/$botname.yaml /etc/$botname.yaml
 buildah run $mycontainer mkdir /run/$botname
+
+# allow manual adaptions
+if [ "$mount_image" -eq 1 ]; then
+read -p "Mount the created container for interactive adaptions (y/n)? " -t 15 doMount
+	# for rootless mode: run in user namespace
+	if [ "$doMount" = "y" ]; then
+		echo "You are inside the container tree. Build environment hasn't been flushed yet!"
+		if [ $(id -u) -eq 0 ]; then
+			# execution in root mode
+			mountpoint=$(buildah mount $mycontainer)
+			cd $mountpoint
+			du -sh *
+			sh
+			buildah umount $mycontainer
+		else
+			# execution in rootless mode
+			# not starting with usernamespace, default to isolate the filesystem with chroot
+			#ENV _BUILDAH_STARTED_IN_USERNS="" BUILDAH_ISOLATION=chroot
+			buildah unshare --mount containerID du -sh ${containerID}/*
+			#buildah unshare du -sh $mountpoint/*
+			buildah unshare sh
+			#buildah unshare umount $mountpoint
+		fi
+	fi
+fi
+
+# cleanup dependencies
+buildah run $mycontainer apk del .build-deps
 
 # cleanup build environment
 buildah config --workingdir="/" $mycontainer
 buildah run $mycontainer rm -rf $buildroot
 buildah run $mycontainer rm -rf go
-buildah run $mycontainer rm -rf usr/local/go usr/local/lib usr/local/share
-
-# not starting with usernamespace, default to isolate the filesystem with chroot
-#ENV _BUILDAH_STARTED_IN_USERNS="" BUILDAH_ISOLATION=chroot
-
-# manual testings
-# for rootless mode: run in user namespace
-#buildah unshare
-
-#mountpoint=$(buildah mount $mycontainer)
-#ls -l $mountpoint/$prefixbin
-#buildah umount $mycontainer
+buildah run $mycontainer rm -rf usr/local/go usr/local/lib usr/local/share root/.cache
 
 # tag the container to an image name, sign it. on success remove container
 imageid=$(buildah commit \
@@ -77,7 +101,7 @@ imageid=$(buildah commit \
 # tag our new image with an alternate name
 #buildah tag $botname nctjb
 
-if [ "$push_image" == "true" ]; then
+if [ "$push_image" -eq 1 ]; then
 	# push image to Quay Container Registry
 	#imageid=$(buildah images | grep $repo/$username/$botname | awk -F ' ' '{print $3}')
 	buildah push \
