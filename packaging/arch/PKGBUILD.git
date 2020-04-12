@@ -1,19 +1,19 @@
 # vim:set ts=8 sw=8 et:
 # Maintainer: Ralf Zerres <ralf.zerres@networkx.de>
 
-pkgname=nextcloud-talk-jitsi-bot-git
-_pkgname=nextcloud-talk-jitsi-bot
+pkgname=nctalk-proxyd-git
+_pkgname=nctalk-proxyd
 _branch=master
-pkgver=0.r27.g0ccdd6f
+pkgver=0.r48.gd695070
 pkgrel=1
-pkgdesc="A chat bot framework for Nextcloud Talk to handle Jitsi sessions"
-url="https://github.com/pojntfx/nextcloud-talk-jitsi-bot"
+pkgdesc="A Nextcloud Talk API gRPC proxy daemon"
+url="https://github.com/pojntfx/nextcloud-talk-bot-framework"
 depends=('go')
 makedepends=('go')
-#backup=("etc/webapps/nextcloud/nextcloud-talk-jitsi-bot.cfg")
+backup=("etc/nctalkproxyd.yaml")
 arch=('x86_64')
 license=('GPL')
-source=("${pkgname}::git+https://github.com/pojntfx/${_pkgname}.git#branch=${_branch}")
+source=("${pkgname}::git+https://github.com/pojntfx/nextcloud-talk-bot-framework.git#branch=${_branch}")
 #install=_$pkgname.install
 provides=("$_pkgname")
 #conflicts=('$_pkgname')
@@ -52,14 +52,13 @@ build() {
 	cd "$srcdir"/${pkgbase}
 
 	# create binary targets
-	go build -o $_pkgname main.go
+	go build -o $_pkgname cmd/${pkgname}/main.go
 }
 
 package() {
 	cd "$srcdir"/${pkgbase}
 
-	# install app only, excluding console, modules and modules docs
-	mkdir -p "$pkgdir"/usr/bin
-	install --mode 0750 "./${_pkgname}" "$pkgdir"/usr/bin/$_pkgname
+	install -D --mode 0750 "./${_pkgname}" "$pkgdir"/usr/bin/$_pkgname
 	install -D --mode 0644 "./usr/lib/systemd/system/${_pkgname}.service" "$pkgdir"/usr/lib/systemd/system/${_pkgname}.service
+	install -D --mode 0644 "./examples/${_pkgname}.yaml" "$pkgdir"/etc/${_pkgname}.yaml
 }
