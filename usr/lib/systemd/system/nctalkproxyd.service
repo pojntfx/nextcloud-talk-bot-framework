@@ -1,0 +1,18 @@
+[Unit]
+Description=Nextcould Talk proxy daemon
+After=network.target network-online.target nss-lockup.target
+
+[Service]
+#Environment="NCTALKPROXYD_DBPATH=/var/lib/nctalkproxyd"
+#Environment="NCTALKPROXYD_USERNAME=botusername"
+#Environment="NCTALKPROXYD_PASSWORD=botpassword"
+#Environment="NCTALKPROXYD_ADDRREMOTE=https://mynextcloud.com"
+RuntimeDirectory=nctalkproxyd
+RuntimeDirectoryMode=750
+
+Type=simple
+# oneshot
+ExecStart=/usr/bin/nctalkproxyd -f /etc/nctalkproxyd.yaml
+
+[Install]
+WantedBy=multi-user.target
