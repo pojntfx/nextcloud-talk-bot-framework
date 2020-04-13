@@ -1,10 +1,10 @@
 # vim:set ts=8 sw=8 et:
 # Maintainer: Ralf Zerres <ralf.zerres@networkx.de>
 
-pkgname=nctalk-proxyd-git
-_pkgname=nctalk-proxyd
+pkgname=nctalkproxyd-git
+_pkgname=nctalkproxyd
 _branch=master
-pkgver=0.r48.gd695070
+pkgver=0.r54.ge561a3d
 pkgrel=1
 pkgdesc="A Nextcloud Talk API gRPC proxy daemon"
 url="https://github.com/pojntfx/nextcloud-talk-bot-framework"
@@ -17,7 +17,6 @@ source=("${pkgname}::git+https://github.com/pojntfx/nextcloud-talk-bot-framework
 #install=_$pkgname.install
 provides=("$_pkgname")
 #conflicts=('$_pkgname')
-
 sha256sums=('SKIP')
 validpgpkeys=(
 		'1EC4BE4FF2A6C9F4DDDF30F33C5F485DBD250D66' # Ralf Zerres (Package Signing)
@@ -34,7 +33,7 @@ prepare() {
 	# patching
 	if [ ! -f .makepkg-patched ]; then
 		msg2 "patching:"
-		#git am --signoff ../../patches-git/0002-packaging-Arch-Linux-update-PKGBUILD.git.patch
+		#git am --signoff ../../patches-git/0001-packaging-Arch-Linux-update-PKGBUILD.git.patch
 		touch .makepkg-patched
 		msg2 "no patches for branch '${_branch}' needed"
 
@@ -44,19 +43,19 @@ prepare() {
 }
 
 pkgver() {
-	cd "${srcdir}/${pkgname}"
+	pkgdir=("$srcdir/archpkg")
 	echo "0.r$(git rev-list --count $_branch).g$(git log -1 --format="%h")"
 }
 
 build() {
-	cd "$srcdir"/${pkgbase}
+	cd "$srcdir"/${pkgname}
 
 	# create binary targets
 	go build -o $_pkgname cmd/${pkgname}/main.go
 }
 
 package() {
-	cd "$srcdir"/${pkgbase}
+	cd "$srcdir"/${pkgname}
 
 	install -D --mode 0750 "./${_pkgname}" "$pkgdir"/usr/bin/$_pkgname
 	install -D --mode 0644 "./usr/lib/systemd/system/${_pkgname}.service" "$pkgdir"/usr/lib/systemd/system/${_pkgname}.service
