@@ -39,13 +39,18 @@ https://pojntfx.github.io/nextcloud-talk-bot/`,
 		viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		log.Info("configFileDefault: ", rz.String("configFileDefault", configFileDefault))
+		log.Info("configFileKey: ", rz.String("configFileKey", configFileKey))
 		if !(viper.GetString(configFileKey) == configFileDefault) {
 			viper.SetConfigFile(viper.GetString(configFileKey))
-
+			log.Info("config file: ", rz.String("configFileKey", configFileKey))
 			if err := viper.ReadInConfig(); err != nil {
 				return err
 			}
+		} else {
+			log.Info("config file: ", rz.String("configFileDefault", configFileDefault))
 		}
+
 
 		listener, err := net.Listen("tcp", viper.GetString(addrLocaleKey))
 		if err != nil {
