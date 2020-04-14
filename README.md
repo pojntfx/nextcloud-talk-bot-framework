@@ -1,8 +1,10 @@
 # Nextcloud Talk Bot Framework
 
-A framework for writing Nextcloud Talk chatbots with every language that supports gRPC.
+A framework to realize Nextcloud Talk chatbots in a client/server model, where sessions exchange data via gRPC stubs.
 
-Looking for the Nextcloud Talk Jitsi Bot? It has been re-written as a client for this framework at [pojntfx/nextcloud-talk-bot-jitsi](https://github.com/pojntfx/nextcloud-talk-bot-jitsi)!
+A Nextcloud Talk Jitsi Bot has been re-written, taking advantage of this framework. It implements the client side and
+can be found at [pojntfx/nextcloud-talk-bot-jitsi](https://github.com/pojntfx/nextcloud-talk-bot-jitsi).
+The server part is available as `nctalkproxyd`. The source-code is provided in this repo.
 
 Take a look at the following introduction video:
 
@@ -10,7 +12,19 @@ Take a look at the following introduction video:
 
 ## Overview
 
-The Nextcloud Talk Bot Framework provides a way to create chatbots for Nextcloud in any language that supports gRPC. To do so, `nxtalkproxyd` - a streaming gRPC API for Nextcloud Talk - is the primary part of the framework; in order for you to create a chatbot, you just have to write a client for `nxtalkproxyd`, which will take care of all the heavy lifting for you!
+The Nextcloud Talk Bot Framework discribes a client/server infrastructure to realize Nextcloud chatbots,
+that interact via gRPC sessions.
+
+* Server side
+
+  `nctalkproxyd` implements a server instance written in the **go** language.
+
+* Client side
+
+  In order to create a chatbot, a client counterpart has to be implemented in any gRPC supported language.
+This Client will interacts with `nctalkproxyd` sending and recieving messages. The latter will will take care
+of all the heavy lifting (eg. handling the Nextcloud Talk API, keeping track of participants).
+`nextcloud-talk-bot-jitsi` is a reference implementation written in **javascript**.
 
 ## Installation
 
@@ -20,7 +34,7 @@ A Go package [is available](https://pkg.go.dev/mod/github.com/pojntfx/nextcloud-
 
 ### Docker Image
 
-A Docker image is available at [Docker Hub](https://hub.docker.com/r/pojntfx/nxtalkproxyd).
+A Docker image is available at [Docker Hub](https://hub.docker.com/r/pojntfx/nctalkproxyd).
 
 ### Others
 
@@ -28,34 +42,41 @@ If you're interested in using alternatives like OCI images, see [OCI](./OCI.md).
 
 ## Usage
 
-As explained above, all you have to to write a chatbot is to implement a client for `nxtalkproxyd`! Take a look at [pkg/protos/nextcloud_talk.proto](./pkg/protos/nextcloud_talk.proto) for the protocol. A pretty advanced chatbot that is based on this framework is the [Nextcloud Talk Jitsi Bot](https://github.com/pojntfx/nextcloud-talk-bot-jitsi), so if you want to have a quick start take a look at the repo.
+The API will asure fast and secure messsage exchange via gRPC using protocol buffers. The protocol description
+itself is defined in [pkg/protos/nextcloud_talk.proto](./pkg/protos/nextcloud_talk.proto).
 
-`nxtalkproxyd` requires a user to work with; every Nextcloud Talk room that should be able to use the bots connected to it has to add this user.
+[`nextcloud-talk-bot-jitsi`](https://github.com/pojntfx/nextcloud-talk-bot-jitsi) is a pretty advanced chatbot implementation,
+using this framework. Take it as a reference.
 
-To then start using your bot, you can connect your bot to `nxtalkproxyd` like so (this is the way that the Nextcloud Talk Jitsi Bot does it; don't forget to change i.e. the username and password, it is just an example):
+`nctalkproxyd` will integrate itself in the Nextcloud Talk infrastructure while authenticating as a dedicated user.
+In order to use the bot, this user (e.g. name it "jitsibot") needs to be added as a participent in every Nextcloud Talk room.
+You will handle that as an admin user from within the Nextcloud GUI.
+
+The following code will interconnect a `nctalkproxyd` docker container with a `nextcloud-talk-bot-jitsi`container.
+Please adapt variables to meet your production/testing needs. The given values are just examples:
 
 ```bash
-% docker volume create nxtalkproxyd
-% docker network create nxtalkchatbots
+% docker volume create nctalkproxyd
+% docker network create nctalkchatbots
 % docker run \
-    -p 1969:1969 \
-    -v nxtalkproxyd:/var/lib/nxtalkproxyd \
-    -e NXTALKPROXYD_NXTALKPROXYD_DBPATH=/var/lib/nxtalkproxyd \
-    -e NXTALKPROXYD_NXTALKPROXYD_USERNAME=botusername \
-    -e NXTALKPROXYD_NXTALKPROXYD_PASSWORD=botpassword \
-    -e NXTALKPROXYD_NXTALKPROXYD_RADDR=https://examplenextcloud.com \
-    --network nxtalkchatbots \
-    --name nxtalkproxyd \
-    -d pojntfx/nxtalkproxyd
+	-p 1969:1969 \
+	-v nctalkproxyd:/var/lib/nctalkproxyd \
+	-e NCTALKPROXYD_DBPATH=/var/lib/nctalkproxyd \
+	-e NCTALKPROXYD_USERNAME=botusername \
+	-e NCTALKPROXYD_PASSWORD=botpassword \
+	-e NCTALKPROXYD_ADDRREMOTE=https://mynextcloud.com \
+	--network nctalkchatbots \
+	--name nctalkproxyd \
+	-d pojntfx/nctalkproxyd
 % docker run \
-    -e BOT_JITSI_ADDR=meet.jit.si \
-    -e BOT_JITSI_BOT_NAME=botusername \
-    -e BOT_JITSI_SLEEP_TIME=20 \
-    -e BOT_NXTALKPROXYD_ADDR=nxtalkproxyd:1969 \
-    -e BOT_JITSI_ROOM_PASSWORD_BYTE_LENGTH=1 \
-    -e BOT_COMMANDS=\#videochat,\#videocall,\#custom \
-    --network nxtalkchatbots \
-    -d pojntfx/nextcloud-talk-bot-jitsi
+	-e BOT_JITSI_ADDR=meet.jit.si \
+	-e BOT_JITSI_BOT_NAME=botusername \
+	-e BOT_JITSI_SLEEP_TIME=20 \
+	-e BOT_NCTALKPROXYD_ADDR=nctalkproxyd:1969 \
+	-e BOT_JITSI_ROOM_PASSWORD_BYTE_LENGTH=1 \
+	-e BOT_COMMANDS=\#videochat,\#videocall,\#custom \
+	--network nctalkchatbots \
+	-d pojntfx/nextcloud-talk-bot-jitsi
 ```
 
 ## License
