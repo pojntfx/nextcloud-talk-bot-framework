@@ -78,10 +78,10 @@ nctalkproxyd:
 Adapt the environment variables with appropriate values.
 
 ```env
-NCTALKPROXYD_DBPATH=/var/lib/nxtalkproxyd
+NCTALKPROXYD_DBPATH=/var/lib/nctalkproxyd
 NCTALKPROXYD_USERNAME=botusername
 NCTALKPROXYD_PASSWORD=botpassword
-NCTALKPROXYD_ADDRLOCALE=:1969
+NCTALKPROXYD_ADDRLOCAL=:1969
 NCTALKPROXYD_ADDRREMOTE=https://mynextcloud.com
 ```
 
