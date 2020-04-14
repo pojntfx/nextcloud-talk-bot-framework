@@ -33,7 +33,7 @@ var rootCmd = &cobra.Command{
 	Long: `nctalkproxyd is a Nextcloud Talk API gRPC proxy daemon.
 
 Find more information at:
-https://pojntfx.github.io/nextcloud-talk-bot/`,
+https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		viper.SetEnvPrefix("nctalkproxyd")
 		viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
