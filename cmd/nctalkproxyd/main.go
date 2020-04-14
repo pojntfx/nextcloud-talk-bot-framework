@@ -20,7 +20,7 @@ const (
 	keyPrefix         = "nctalkproxyd."
 	configFileDefault = "/etc/" + keyPrefix + "yaml"
 	configFileKey     = keyPrefix + "configFile"
-	addrLocaleKey     = keyPrefix + "addrLocale"
+	addrLocalKey      = keyPrefix + "addrLocal"
 	addrRemoteKey     = keyPrefix + "addrRemote"
 	usernameKey       = keyPrefix + "username"
 	passwordKey       = keyPrefix + "password"
@@ -52,7 +52,7 @@ https://pojntfx.github.io/nextcloud-talk-bot/`,
 		}
 
 
-		listener, err := net.Listen("tcp", viper.GetString(addrLocaleKey))
+		listener, err := net.Listen("tcp", viper.GetString(addrLocalKey))
 		if err != nil {
 			return err
 		}
@@ -149,7 +149,7 @@ https://pojntfx.github.io/nextcloud-talk-bot/`,
 func init() {
 	var (
 		configFileFlag string
-		addrLocaleFlag string
+		addrLocalFlag  string
 		addrRemoteFlag string
 		usernameFlag   string
 		passwordFlag   string
@@ -157,7 +157,7 @@ func init() {
 	)
 
 	rootCmd.PersistentFlags().StringVarP(&configFileFlag, configFileKey, "f", configFileDefault, cmd.NcTalkProxyConfigurationFile)
-	rootCmd.PersistentFlags().StringVarP(&addrLocaleFlag, addrLocaleKey, "l", cmd.NcTalkProxydDefaultAddrLocal, "Listen address.")
+	rootCmd.PersistentFlags().StringVarP(&addrLocalFlag, addrLocalKey, "l", cmd.NcTalkProxydDefaultAddrLocal, "Listen address.")
 	rootCmd.PersistentFlags().StringVarP(&addrRemoteFlag, addrRemoteKey, "r", "https://mynextcloud.com", "Nextcloud address.")
 	rootCmd.PersistentFlags().StringVarP(&usernameFlag, usernameKey, "u", "botusername", "Nextcloud bot account username.")
 	rootCmd.PersistentFlags().StringVarP(&passwordFlag, passwordKey, "p", "botpassword", "Nextcloud bot account password.")
