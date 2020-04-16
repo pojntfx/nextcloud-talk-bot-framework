@@ -17,7 +17,7 @@ Please talk into account, that internetworking between pods is ony supported for
 Pull the image:
 
 ```bash
-$ podman pull quay.io/rzerres/nctalk-proxyd:latest
+$ podman pull quay.io/rzerres/nctalkproxyd:latest
 ```
 
 Check the network setup
@@ -59,7 +59,7 @@ to get more insightdetails.
 parameters or via corresponding environment variables. The latter take precedence.
 
 ```bash
-$ systemctl edit --full nctalk-proxyd.service
+$ systemctl edit --full nctalkproxyd.service
 ```
 
 The config file is preset with the following defaults:
