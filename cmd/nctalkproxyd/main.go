@@ -36,25 +36,30 @@ Find more information at:
 https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		viper.SetEnvPrefix("nctalkproxyd")
+		// convert Environment parameter names with camel case syntax
 		viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		log.Info("configFileDefault: ", rz.String("configFileDefault", configFileDefault))
-		log.Info("configFileKey: ", rz.String("configFileKey", configFileKey))
 		if !(viper.GetString(configFileKey) == configFileDefault) {
 			viper.SetConfigFile(viper.GetString(configFileKey))
-			log.Info("config file: ", rz.String("configFileKey", configFileKey))
+			log.Info("nctalkproxyd: using custom config file", rz.String("configFile", viper.GetString(configFileKey)))
 			if err := viper.ReadInConfig(); err != nil {
 				return err
 			}
 		} else {
-			log.Info("config file: ", rz.String("configFileDefault", configFileDefault))
+			log.Info("nctalkproxyd: using default config file", rz.String("configFile:", configFileDefault))
+			viper.SetConfigFile(configFileDefault)
+			if err := viper.ReadInConfig(); err != nil {
+				return err
+			}
 		}
 
 
 		listener, err := net.Listen("tcp", viper.GetString(addrLocalKey))
 		if err != nil {
 			return err
+		} else {
+			log.Info("nctalkproxyd: listener established", rz.String("addrLocal", viper.GetString(addrLocalKey)))
 		}
 
 		server := grpc.NewServer()
@@ -74,9 +79,13 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 			chatChan,
 			statusChan,
 		)
+		log.Info("nctalkproxyd: Bot connection to NextcloudTalk configured",
+					rz.String("addrRemote", viper.GetString(addrRemoteKey)),
+					rz.String("user",  viper.GetString(usernameKey)))
 
 		writeChan := func(token, message string) error {
-			log.Info("writing chat from client to Nextcloud Talk", rz.String("token", token), rz.String("message", message))
+			log.Info("writing chat from client to Nextcloud Talk",
+					  rz.String("token", token), rz.String("message", message))
 
 			return nextcloudTalkClient.WriteChat(token, message)
 		}
@@ -156,9 +165,9 @@ func init() {
 		dbpathFlag     string
 	)
 
-	rootCmd.PersistentFlags().StringVarP(&configFileFlag, configFileKey, "f", configFileDefault, cmd.NcTalkProxyConfigurationFile)
-	rootCmd.PersistentFlags().StringVarP(&addrLocalFlag, addrLocalKey, "l", cmd.NcTalkProxydDefaultAddrLocal, "Listen address.")
-	rootCmd.PersistentFlags().StringVarP(&addrRemoteFlag, addrRemoteKey, "r", "https://mynextcloud.com", "Nextcloud address.")
+	rootCmd.PersistentFlags().StringVarP(&configFileFlag, configFileKey, "c", configFileDefault, cmd.NcTalkProxyConfigurationFile)
+	rootCmd.PersistentFlags().StringVarP(&addrLocalFlag, addrLocalKey, "l", cmd.NcTalkProxydDefaultAddrLocal, "NcTalkProxyd address.")
+	rootCmd.PersistentFlags().StringVarP(&addrRemoteFlag, addrRemoteKey, "r", "https://mynextcloud.com", "Nextcloud bot address.")
 	rootCmd.PersistentFlags().StringVarP(&usernameFlag, usernameKey, "u", "botusername", "Nextcloud bot account username.")
 	rootCmd.PersistentFlags().StringVarP(&passwordFlag, passwordKey, "p", "botpassword", "Nextcloud bot account password.")
 	rootCmd.PersistentFlags().StringVarP(&dbpathFlag, dbpathKey, "d", "/var/lib/nctalkproxyd", "Database path.")
