@@ -6,7 +6,7 @@ set -x
 # buildah: creating a container for Nextcloud-Talk proxy daemon (OCI format)
 ###
 
-push_image=0
+push_image=1
 mount_image=1
 
 # variables
@@ -31,11 +31,11 @@ mycontainer=$(buildah from --name $botname golang:alpine)
 buildah config --author="$author" $mycontainer
 buildah config --label name=$botname $mycontainer
 buildah config --label maintainer="$maintainer" $mycontainer
-buildah config --env BOT_NEXTCLOUD_USERNAME="jitsibot" $mycontainer
-buildah config --env BOT_NEXTCLOUD_PASSWORD="password" $mycontainer
-buildah config --env BOT_DB_LOCATION="/run/$botname" $mycontainer
-buildah config --env BOT_NEXTCLOUD_URL="https://localhost" $mycontainer
-buildah config --env BOT_JITSI_URL="https://meet.jit.si" $mycontainer
+buildah config --env NCTALKPROXYD_USERNAME="jitsibot" $mycontainer
+buildah config --env NCTALKPROXYD_PASSWORD="password" $mycontainer
+buildah config --env NCTALKPROXYD_DBLOCATION="/run/$botname" $mycontainer
+buildah config --env NCTALKPROXYD_ADDRLOCAL="https://localhost:1696" $mycontainer
+buildah config --env NCTALKPROXYD_ADDRREMOTE="https://my.nextcloud.local" $mycontainer
 
 # create the build environment inside the container
 #buildah config --env GOPATH="$buildroot" $mycontainer
