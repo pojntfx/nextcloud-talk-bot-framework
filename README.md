@@ -2,8 +2,8 @@
 
 A framework to realize Nextcloud Talk chatbots in a client/server model, where sessions exchange data via gRPC stubs.
 
-A Nextcloud Talk Jitsi Bot has been re-written, taking advantage of this framework. It implements the client side and
-can be found at [pojntfx/nextcloud-talk-bot-jitsi](https://github.com/pojntfx/nextcloud-talk-bot-jitsi).
+The bot has bin re-written as `nctalkbot-jitsi`. It takes advantage of the new framework and implements the client side.
+Please have a look at at [pojntfx/nextcloud-talk-bot-jitsi](https://github.com/pojntfx/nextcloud-talk-bot-jitsi).
 The server part is available as `nctalkproxyd`. The source-code is provided in this repo.
 
 Take a look at the following introduction video:
@@ -17,14 +17,29 @@ that interact via gRPC sessions.
 
 * Server side
 
-  `nctalkproxyd` implements a server instance written in the **go** language.
+  `nctalkproxyd` implements a server instance written in the **go** language. This component
+  handles all the interaction with the Nextcloud API. It will listen for new chat requests while
+  monitoring the associated rooms. Chat requests will be processed and the relavant data are proxied
+  via gRPC messages to the client side. The new session will be advertised inside the addressed Nextcloud chat.
 
 * Client side
 
-  In order to create a chatbot, a client counterpart has to be implemented in any gRPC supported language.
+In order to create a chatbot, a client counterpart has to be implemented in any gRPC supported language.
 This Client will interacts with `nctalkproxyd` sending and recieving messages. The latter will will take care
 of all the heavy lifting (eg. handling the Nextcloud Talk API, keeping track of participants).
-`nextcloud-talk-bot-jitsi` is a reference implementation written in **javascript**.
+`nctalkbot-jitsi` is a reference implementation written in **javascript**.
+
+* Jitsi-Meet
+
+Participants will connect to the initiated Jitsi meeting inside a new window of their browser session.
+`jitsi-meet-node` will take care to process the needed steps. The communication with the Jitsi-Meet server
+follows the [JitsiMeetExternal API](ttps://github.com/jitsi/jitsi-meet/blob/master/doc/api.md).
+The framework is taking care to preset the Session parameters (eg. Name, password), beside participant
+specicfic options (participant name, language, etc).
+
+The following image try to illustrate the major components and its workflow.
+
+ [![nctalkbot-framework.png](./images/nctalkbot-framework.png)
 
 ## Installation
 
@@ -45,19 +60,19 @@ If you're interested in using alternatives like OCI images, see [OCI](./OCI.md).
 The API will asure fast and secure messsage exchange via gRPC using protocol buffers. The protocol description
 itself is defined in [pkg/protos/nextcloud_talk.proto](./pkg/protos/nextcloud_talk.proto).
 
-[`nextcloud-talk-bot-jitsi`](https://github.com/pojntfx/nextcloud-talk-bot-jitsi) is a pretty advanced chatbot implementation,
+[`nctalkbot-jitsi`](https://github.com/pojntfx/nextcloud-talk-bot-jitsi) is a pretty advanced chatbot implementation,
 using this framework. Take it as a reference.
 
 `nctalkproxyd` will integrate itself in the Nextcloud Talk infrastructure while authenticating as a dedicated user.
 In order to use the bot, this user (e.g. name it "jitsibot") needs to be added as a participent in every Nextcloud Talk room.
 You will handle that as an admin user from within the Nextcloud GUI.
 
-The following code will interconnect a `nctalkproxyd` docker container with a `nextcloud-talk-bot-jitsi`container.
+The following code will interconnect a `nctalkproxyd` docker container with a `nctalkbot-jitsi`container.
 Please adapt variables to meet your production/testing needs. The given values are just examples:
 
 ```bash
 % docker volume create nctalkproxyd
-% docker network create nctalkchatbots
+% docker network create nctalkbots
 % docker run \
 	-p 1969:1969 \
 	-v nctalkproxyd:/var/lib/nctalkproxyd \
@@ -69,14 +84,14 @@ Please adapt variables to meet your production/testing needs. The given values a
 	--name nctalkproxyd \
 	-d pojntfx/nctalkproxyd
 % docker run \
-	-e BOT_JITSI_ADDR=meet.jit.si \
-	-e BOT_JITSI_BOT_NAME=botusername \
-	-e BOT_JITSI_SLEEP_TIME=20 \
-	-e BOT_NCTALKPROXYD_ADDR=nctalkproxyd:1969 \
-	-e BOT_JITSI_ROOM_PASSWORD_BYTE_LENGTH=1 \
-	-e BOT_COMMANDS=\#videochat,\#videocall,\#custom \
-	--network nctalkchatbots \
-	-d pojntfx/nextcloud-talk-bot-jitsi
+	-e NCTALKBOT_BOT_NAME=botusername \
+	-e NCTALKBOT_COMMANDS=\#videochat,\#videocall,\#custom \
+	-e NCTALKBOT_SLEEP_TIME=20 \
+	-e NCTALKBOT_JITSI_ADDR=meet.jit.si \
+	-e NCTALKBOT_JITSI_ROOM_PASSWORD_BYTE_LENGTH=1 \
+	-e NCTALKBOT_NCTALKPROXYD_ADDR=localhost:1969 \
+	--network nctalkbots \
+	-d pojntfx/nctalkbot-jitsi
 ```
 
 ## License
