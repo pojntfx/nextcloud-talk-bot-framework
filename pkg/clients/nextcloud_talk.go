@@ -18,12 +18,13 @@ type NextcloudTalk struct {
 	roomChan                            chan Room
 	statusChan                          chan string
 	knownIDs                            *pogreb.DB
+	processedRooms                      []Room
 }
 
 // NewNextcloudTalk creates a new Nextcloud Talk Client.
 func NewNextcloudTalk(url, username, password, dbLocation string, chatChan chan Chat, statusChan chan string) *NextcloudTalk {
 	return &NextcloudTalk{
-		url, username, password, dbLocation, chatChan, make(chan Room), statusChan, nil,
+		url, username, password, dbLocation, chatChan, make(chan Room), statusChan, nil, []Room{},
 	}
 }
 
@@ -97,8 +98,6 @@ func (n *NextcloudTalk) Close() error {
 
 // ReadRooms reads the rooms.
 func (n *NextcloudTalk) ReadRooms() error {
-	var lastRooms []Room
-
 	for {
 		rooms, err := n.getRooms()
 		if err != nil {
@@ -108,7 +107,7 @@ func (n *NextcloudTalk) ReadRooms() error {
 		for _, room := range rooms {
 			exists := false
 
-			for _, lastRoom := range lastRooms {
+			for _, lastRoom := range n.processedRooms {
 				if room.ID == lastRoom.ID {
 					exists = true
 
@@ -121,7 +120,7 @@ func (n *NextcloudTalk) ReadRooms() error {
 			}
 		}
 
-		lastRooms = rooms
+		n.processedRooms = rooms
 
 		time.Sleep(time.Second * 5)
 	}
@@ -161,7 +160,17 @@ func (n *NextcloudTalk) ReadChats() error {
 
 					n.statusChan <- err.Error()
 
-					continue
+					// This means that the JSON output is invalid; this can happen during, for example, very high load situations.
+					// Reconnect to the room in the next cycle
+					newRooms := []Room{}
+					for _, room := range n.processedRooms {
+						if room.ID != currentRoom.ID {
+							newRooms = append(newRooms, room)
+						}
+					}
+					n.processedRooms = newRooms
+
+					return
 				}
 
 				if len(chats) != 0 {
