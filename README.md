@@ -10,6 +10,10 @@ Take a look at the following introduction video:
 
 [![thumbnail](https://i3.ytimg.com/vi/WRYlHDGApZo/maxresdefault.jpg)](https://www.youtube.com/watch?v=WRYlHDGApZo)
 
+Take a look at the following introduction video:
+
+[![thumbnail](https://i3.ytimg.com/vi/WRYlHDGApZo/maxresdefault.jpg)](https://www.youtube.com/watch?v=WRYlHDGApZo)
+
 ## Overview
 
 The Nextcloud Talk Bot Framework discribes a client/server infrastructure to realize Nextcloud chatbots,
