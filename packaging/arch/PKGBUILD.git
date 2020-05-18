@@ -1,23 +1,22 @@
 # vim:set ts=8 sw=8 et:
 # Maintainer: Ralf Zerres <ralf.zerres@networkx.de>
 
-pkgname=nextcloud-talk-jitsi-bot-git
-_pkgname=nextcloud-talk-jitsi-bot
-_branch=master
-pkgver=0.r27.g0ccdd6f
+pkgname=nctalkproxyd-git
+_pkgname=nctalkproxyd
+_branch=wip-nctalkproxyd
+pkgver=0.r54.ge561a3d
 pkgrel=1
-pkgdesc="A chat bot framework for Nextcloud Talk to handle Jitsi sessions"
-url="https://github.com/pojntfx/nextcloud-talk-jitsi-bot"
+pkgdesc="A Nextcloud Talk API gRPC proxy daemon"
+url="https://github.com/rzerres/nextcloud-talk-bot-framework"
 depends=('go')
 makedepends=('go')
-#backup=("etc/webapps/nextcloud/nextcloud-talk-jitsi-bot.cfg")
+backup=("etc/nctalkproxyd.yaml")
 arch=('x86_64')
 license=('GPL')
-source=("${pkgname}::git+https://github.com/pojntfx/${_pkgname}.git#branch=${_branch}")
+source=("${pkgname}::git+https://github.com/rzerres/nextcloud-talk-bot-framework.git#branch=${_branch}")
 #install=_$pkgname.install
 provides=("$_pkgname")
 #conflicts=('$_pkgname')
-
 sha256sums=('SKIP')
 validpgpkeys=(
 		'1EC4BE4FF2A6C9F4DDDF30F33C5F485DBD250D66' # Ralf Zerres (Package Signing)
@@ -34,7 +33,7 @@ prepare() {
 	# patching
 	if [ ! -f .makepkg-patched ]; then
 		msg2 "patching:"
-		#git am --signoff ../../patches-git/0002-packaging-Arch-Linux-update-PKGBUILD.git.patch
+		#git am --signoff ../../patches-git/0001-packaging-Arch-Linux-update-PKGBUILD.git.patch
 		touch .makepkg-patched
 		msg2 "no patches for branch '${_branch}' needed"
 
@@ -44,22 +43,21 @@ prepare() {
 }
 
 pkgver() {
-	cd "${srcdir}/${pkgname}"
+	pkgdir=("$srcdir/archpkg")
 	echo "0.r$(git rev-list --count $_branch).g$(git log -1 --format="%h")"
 }
 
 build() {
-	cd "$srcdir"/${pkgbase}
+	cd "$srcdir"/${pkgname}
 
 	# create binary targets
-	go build -o $_pkgname main.go
+	go build -o $_pkgname cmd/${_pkgname}/main.go
 }
 
 package() {
-	cd "$srcdir"/${pkgbase}
+	cd "$srcdir"/${pkgname}
 
-	# install app only, excluding console, modules and modules docs
-	mkdir -p "$pkgdir"/usr/bin
-	install --mode 0750 "./${_pkgname}" "$pkgdir"/usr/bin/$_pkgname
+	install -D --mode 0750 "./${_pkgname}" "$pkgdir"/usr/bin/$_pkgname
 	install -D --mode 0644 "./usr/lib/systemd/system/${_pkgname}.service" "$pkgdir"/usr/lib/systemd/system/${_pkgname}.service
+	install -D --mode 0644 "./examples/${_pkgname}.yaml" "$pkgdir"/etc/${_pkgname}.yaml
 }

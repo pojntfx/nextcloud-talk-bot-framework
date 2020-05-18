@@ -5,7 +5,7 @@
 On your build system you need an up to date go compiler. Create an executable like this
 
 ```bash
-$ go build -o /tmp/nextcloud-jitsi-bot main.go
+$ go build -o /tmp/nctalkproxyd cmd/nctalkproxyd/main.go
 ```
 
 ## Create an OCI image
