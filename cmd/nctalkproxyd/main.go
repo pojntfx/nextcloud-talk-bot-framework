@@ -19,7 +19,7 @@ import (
 
 const (
 	keyPrefix         = "nctalkproxyd."
-	configFileDefault = "nctalkproxyd"  // viper will resolve supported format extension
+	configFileDefault = "nctalkproxyd" // viper will resolve supported format extension
 	configFileKey     = keyPrefix + "configFile"
 	addrLocalKey      = keyPrefix + "addrLocal"
 	addrRemoteKey     = keyPrefix + "addrRemote"
@@ -78,7 +78,7 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 			)
 			log.Info("nctalkproxyd: Bot connection to NextcloudTalk configured",
 				rz.String("addrRemote", viper.GetString(addrRemoteKey)),
-				rz.String("user",  viper.GetString(usernameKey)))
+				rz.String("user", viper.GetString(usernameKey)))
 
 			writeChan := func(token, message string) error {
 				log.Info("writing chat from client to Nextcloud Talk",
@@ -156,7 +156,7 @@ https://pojntfx.github.io/nextcloud-talk-bot-framework/`,
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "nctalkproxyd is a Nextcloud Talk API gRPC proxy daemon.",
-	Long: `nctalkproxyd is implementet in the go language`,
+	Long:  `nctalkproxyd is implementet in the go language`,
 }
 
 func init() {
@@ -175,7 +175,6 @@ func init() {
 	viper.SetDefault("author", "Felix Pojntinger")
 	viper.SetDefault("license", "AGPLv3")
 
-
 	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
 		log.Fatal(cmd.CouldNotBindFlagsErrorMessage, rz.Err(err))
 	}
@@ -190,7 +189,7 @@ func initConfig() {
 	viper.AddConfigPath(".")
 
 	// handle config file
-	if  len(viper.GetString(configFileKey)) > 0 {
+	if len(viper.GetString(configFileKey)) > 0 {
 		// Use config file from the flag.
 		fmt.Println("Using config file:", configFile)
 		viper.SetConfigName(configFile)
@@ -217,7 +216,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	// array with valid environment variables
-	env_vars := [] string{
+	env_vars := []string{
 		"nctalkproxyd_addrRemote",
 		"nctalkproxyd_addrLocal",
 		"nctalkproxyd_username",
