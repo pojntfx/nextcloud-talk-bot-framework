@@ -1,6 +1,6 @@
 # OCI
 
-An Open Containers Initiative (OCI) image that provides `nxtalkproxyd` is available at
+An Open Containers Initiative (OCI) image that provides `nctalkproxyd` is available at
 [Quay.io](https://quay.io/rzerres/nctalkproxyd).
 
 The images can be combined with the bot image of `nctalk-bot-jitsi`. Its up to you, to

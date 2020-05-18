@@ -10,40 +10,33 @@ Take a look at the following introduction video:
 
 [![thumbnail](https://i3.ytimg.com/vi/WRYlHDGApZo/maxresdefault.jpg)](https://www.youtube.com/watch?v=WRYlHDGApZo)
 
-Take a look at the following introduction video:
-
-[![thumbnail](https://i3.ytimg.com/vi/WRYlHDGApZo/maxresdefault.jpg)](https://www.youtube.com/watch?v=WRYlHDGApZo)
-
 ## Overview
 
 The Nextcloud Talk Bot Framework discribes a client/server infrastructure to realize Nextcloud chatbots,
-that interact via gRPC sessions.
+that interact via gRPC sessions. Shown here is an example for [`nctalkbot-jitsi`](https://github.com/pojntfx/nextcloud-talk-bot-jitsi).
 
-* Server side
-
-  `nctalkproxyd` implements a server instance written in the **go** language. This component
+- **Server side**:
+  `nctalkproxyd` implements a server instance written in the **Go** language. This component
   handles all the interaction with the Nextcloud API. It will listen for new chat requests while
   monitoring the associated rooms. Chat requests will be processed and the relavant data are proxied
   via gRPC messages to the client side. The new session will be advertised inside the addressed Nextcloud chat.
 
-* Client side
+- **Client side**;
+  In order to create a chatbot, a client counterpart has to be implemented in any gRPC supported language.
+  This Client will interacts with `nctalkproxyd` sending and recieving messages. The latter will will take care
+  of all the heavy lifting (eg. handling the Nextcloud Talk API, keeping track of participants).
+  `nctalkbot-jitsi` is a reference implementation written in **JavaScript**.
 
-In order to create a chatbot, a client counterpart has to be implemented in any gRPC supported language.
-This Client will interacts with `nctalkproxyd` sending and recieving messages. The latter will will take care
-of all the heavy lifting (eg. handling the Nextcloud Talk API, keeping track of participants).
-`nctalkbot-jitsi` is a reference implementation written in **javascript**.
-
-* Jitsi-Meet
-
-Participants will connect to the initiated Jitsi meeting inside a new window of their browser session.
-`jitsi-meet-node` will take care to process the needed steps. The communication with the Jitsi-Meet server
-follows the [JitsiMeetExternal API](ttps://github.com/jitsi/jitsi-meet/blob/master/doc/api.md).
-The framework is taking care to preset the Session parameters (eg. Name, password), beside participant
-specicfic options (participant name, language, etc).
+- **Jitsi-Meet**;
+  Participants will connect to the initiated Jitsi meeting inside a new window of their browser session.
+  `jitsi-meet-node` will take care to process the needed steps. The communication with the Jitsi-Meet server
+  follows the [JitsiMeetExternal API](ttps://github.com/jitsi/jitsi-meet/blob/master/doc/api.md).
+  The framework is taking care to preset the Session parameters (eg. Name, password), beside participant
+  specicfic options (participant name, language, etc).
 
 The following image try to illustrate the major components and its workflow.
 
- [![nctalkbot-framework.png](./images/nctalkbot-framework.png)
+![nctalkbot-framework.png](./images/nctalkbot-framework.png)
 
 ## Installation
 

@@ -54,7 +54,7 @@ func (n *NextcloudTalk) getRooms() ([]Room, error) {
 			"Accept":         "application/json",
 		}).
 		SetBasicAuth(n.username, n.password).
-		Get(n.url + "/" + path.Join("ocs", "v2.php", "apps", "spreed", "api", "v2", "room"))
+		Get(n.url + "/" + path.Join("ocs", "v2.php", "apps", "spreed", "api", "v1", "room"))
 	if err != nil {
 		return nil, err
 	}
@@ -109,168 +109,7 @@ func (n *NextcloudTalk) ReadChats() error {
 				has, err := n.knownIDs.Has([]byte(currentRoom.Token))
 				if err != nil {
 					n.statusChan <- err.Error()
-// ReadRooms reads the rooms.
-func (n *NextcloudTalk) ReadRooms() error {
-	var lastRooms []Room
-
-	for {
-		rooms, err := n.getRooms()
-		if err != nil {
-			return err
-		}
-
-		for _, room := range rooms {
-			exists := false
-
-			for _, lastRoom := range lastRooms {
-				if room.ID == lastRoom.ID {
-					exists = true
-
-					break
 				}
-			}
-
-			if !exists {
-				n.roomChan <- room
-			}
-		}
-
-		lastRooms = rooms
-
-		time.Sleep(time.Second * 5)
-	}
-}
-
-g
-					continue
-				}// ReadRooms reads the rooms.
-func (n *NextcloudTalk) ReadRooms() error {
-	var lastRooms []Room
-
-	for {
-		rooms, err := n.getRooms()
-		if err != nil {
-			return err
-		}
-
-		for _, room := range rooms {
-			exists := false
-
-			for _, lastRoom := range lastRooms {
-				if room.ID == lastRoom.ID {
-					exists = true
-
-					break
-				}
-			}
-
-			if !exists {
-				n.roomChan <- room
-			}
-		}
-
-		lastRooms = rooms
-
-		time.Sleep(time.Second * 5)
-	}
-}
-
-u// ReadRooms reads the rooms.
-func (n *NextcloudTalk) ReadRooms() error {
-	var lastRooms []Room
-
-	for {
-		rooms, err := n.getRooms()
-		if err != nil {
-			return err
-		}
-
-		for _, room := range rooms {
-			exists := false
-
-			for _, lastRoom := range lastRooms {
-				if room.ID == lastRoom.ID {
-					exists = true
-
-					break
-				}
-			}
-
-			if !exists {
-				n.roomChan <- room
-			}
-		}
-
-		lastRooms = rooms
-
-		time.Sleep(time.Second * 5)
-	}
-}
-
-u// ReadRooms reads the rooms.
-func (n *NextcloudTalk) ReadRooms() error {
-	for {
-		rooms, err := n.getRooms()
-		if err != nil {
-			return err
-		}
-
-		for _, room := range rooms {
-			exists := false
-
-			for _, lastRoom := range n.processedRooms {
-				if room.ID == lastRoom.ID {
-					exists = true
-
-					break
-				}
-			}
-
-			if !exists {
-				n.roomChan <- room
-			}
-		}
-
-		n.processedRooms = rooms
-
-		time.Sleep(time.Second * 5)
-	}
-}
-
-u// ReadRooms reads the rooms.
-func (n *NextcloudTalk) ReadRooms() error {
-	var lastRooms []Room
-
-	for {
-		rooms, err := n.getRooms()
-		if err != nil {
-			return err
-		}
-
-		for _, room := range rooms {
-			exists := false
-
-			for _, lastRoom := range lastRooms {
-				if room.ID == lastRoom.ID {
-					exists = true
-
-					break
-				}
-			}
-
-			if !exists {
-				n.roomChan <- room
-			}
-		}
-
-		lastRooms = rooms
-
-		time.Sleep(time.Second * 5)
-	}
-}
-
-u
-
 				if has {
 					lastID, err = n.knownIDs.Get([]byte(currentRoom.Token))
 					if err != nil {
@@ -344,7 +183,6 @@ func (n *NextcloudTalk) ReadRooms() error {
 			}
 
 			if !exists {
-				// advertise new rooms to the room channel
 				n.roomChan <- room
 			}
 		}

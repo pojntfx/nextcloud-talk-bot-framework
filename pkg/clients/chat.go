@@ -4,7 +4,7 @@ package clients
 type Chat struct {
 	ID                int    `json:"id"`
 	Token             string `json:"token"`
-	ActorType         string `json:"actorType"`          // guest, user
+	ActorType         string `json:"actorType"` // guest, user
 	ActorID           string `json:"actorId"`
 	ActorDisplayName  string `json:"actorDisplayName"`
 	IsReplyable       bool   `json:"isReplyable"`

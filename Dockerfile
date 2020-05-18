@@ -7,10 +7,10 @@ RUN go get github.com/golang/protobuf/protoc-gen-go
 
 COPY . .
 
-RUN go build -o /tmp/nxtalkproxyd ./cmd/nxtalkproxyd/main.go
+RUN go build -o /tmp/nctalkproxyd ./cmd/nctalkproxyd/main.go
 
 FROM alpine
 
-COPY --from=build /tmp/nxtalkproxyd /usr/local/bin
+COPY --from=build /tmp/nctalkproxyd /usr/local/bin
 
-CMD /usr/local/bin/nxtalkproxyd
+CMD /usr/local/bin/nctalkproxyd
