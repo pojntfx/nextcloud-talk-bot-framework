@@ -21,13 +21,13 @@ that interact via gRPC sessions. Shown here is an example for [`nctalkbot-jitsi`
   monitoring the associated rooms. Chat requests will be processed and the relavant data are proxied
   via gRPC messages to the client side. The new session will be advertised inside the addressed Nextcloud chat.
 
-- **Client side**;
+- **Client side**:
   In order to create a chatbot, a client counterpart has to be implemented in any gRPC supported language.
   This Client will interacts with `nctalkproxyd` sending and recieving messages. The latter will will take care
   of all the heavy lifting (eg. handling the Nextcloud Talk API, keeping track of participants).
   `nctalkbot-jitsi` is a reference implementation written in **JavaScript**.
 
-- **Jitsi-Meet**;
+- **Jitsi-Meet**:
   Participants will connect to the initiated Jitsi meeting inside a new window of their browser session.
   `jitsi-meet-node` will take care to process the needed steps. The communication with the Jitsi-Meet server
   follows the [JitsiMeetExternal API](ttps://github.com/jitsi/jitsi-meet/blob/master/doc/api.md).
